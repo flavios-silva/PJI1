@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pizzaria Check-In — Gestão de turnos sem planilha e sem WhatsApp</title>
+  <meta name="description" content="Sistema digital de checklists de turno para restaurantes. Funcionários registram tarefas com foto, gestores aprovam em tempo real. Funciona no celular como app." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:        #E53935;
+      --red-dark:   #B71C1C;
+      --red-light:  #FFEBEE;
+      --amber:      #FF8F00;
+      --green:      #2E7D32;
+      --dark:       #0F0F1A;
+      --dark-2:     #1A1A2E;
+      --dark-3:     #252540;
+      --surface:    #FFFFFF;
+      --surface-2:  #F8F9FA;
+      --text:       #1A1A2E;
+      --text-muted: #6B7280;
+      --border:     #E5E7EB;
+      --radius:     14px;
+      --radius-lg:  20px;
+      --shadow-sm:  0 2px 8px rgba(0,0,0,.06);
+      --shadow-md:  0 8px 32px rgba(0,0,0,.10);
+      --shadow-lg:  0 20px 60px rgba(0,0,0,.14);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text);
+      background: var(--surface);
+      overflow-x: hidden;
+    }
+
+    /* ── Utilitários ─────────────────────────────── */
+    .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+    .tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--red); background: var(--red-light);
+      padding: 5px 12px; border-radius: 100px;
+    }
+    .tag::before { content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
+    .section-label { text-align: center; margin-bottom: 16px; }
+    h2.section-title {
+      font-size: clamp(28px, 4vw, 40px); font-weight: 800;
+      text-align: center; line-height: 1.2; margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 17px; color: var(--text-muted); text-align: center;
+      max-width: 580px; margin: 0 auto 56px; line-height: 1.6;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: inherit; font-size: 15px; font-weight: 600;
+      padding: 14px 28px; border-radius: 100px; border: none; cursor: pointer;
+      text-decoration: none; transition: all .2s ease;
+    }
+    .btn-primary {
+      background: var(--red); color: #fff;
+      box-shadow: 0 4px 20px rgba(229,57,53,.4);
+    }
+    .btn-primary:hover { background: var(--red-dark); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(229,57,53,.5); }
+    .btn-ghost {
+      background: rgba(255,255,255,.12); color: #fff;
+      border: 1.5px solid rgba(255,255,255,.25);
+      backdrop-filter: blur(8px);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,.2); transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent; color: var(--red);
+      border: 2px solid var(--red);
+    }
+    .btn-outline:hover { background: var(--red); color: #fff; }
+
+    /* ── Navbar ──────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 0;
+      transition: all .3s ease;
+    }
+    nav.scrolled {
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-sm);
+      padding: 12px 0;
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 18px; font-weight: 800; color: #fff;
+      text-decoration: none; transition: color .3s;
+    }
+    nav.scrolled .nav-logo { color: var(--text); }
+    .logo-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--red); display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .nav-links {
+      display: flex; align-items: center; gap: 32px; list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px; font-weight: 500;
+      color: rgba(255,255,255,.8); text-decoration: none; transition: color .3s;
+    }
+    nav.scrolled .nav-links a { color: var(--text-muted); }
+    .nav-links a:hover { color: #fff; }
+    nav.scrolled .nav-links a:hover { color: var(--red); }
+    .nav-cta { display: flex; align-items: center; gap: 12px; }
+    .nav-cta .btn { padding: 10px 22px; font-size: 14px; }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all .3s; }
+    nav.scrolled .hamburger span { background: var(--text); }
+
+    /* ── Hero ────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 40%, #2D0A0A 100%);
+      display: flex; align-items: center;
+      padding: 120px 0 80px;
+      position: relative; overflow: hidden;
+    }
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 70% 50%, rgba(229,57,53,.15) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(255,143,0,.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 60px; align-items: center;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--amber); margin-bottom: 20px;
+    }
+    .hero-eyebrow::before {
+      content: ''; display: block; width: 20px; height: 2px; background: var(--amber);
+    }
+    h1 {
+      font-size: clamp(36px, 5vw, 56px); font-weight: 900; line-height: 1.1;
+      color: #fff; margin-bottom: 20px;
+    }
+    h1 span { color: var(--red); }
+    .hero-sub {
+      font-size: 17px; line-height: 1.7; color: rgba(255,255,255,.65);
+      margin-bottom: 36px; max-width: 480px;
+    }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .hero-badges {
+      display: flex; align-items: center; gap: 20px; margin-top: 36px;
+      flex-wrap: wrap;
+    }
+    .hero-badge {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500; color: rgba(255,255,255,.6);
+    }
+    .hero-badge svg { opacity: .7; }
+
+    .hero-visual {
+      position: relative; display: flex; justify-content: center;
+    }
+    .phone-frame {
+      width: 260px; height: 520px;
+      background: var(--dark-3);
+      border-radius: 36px;
+      border: 2px solid rgba(255,255,255,.08);
+      box-shadow: 0 40px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04);
+      overflow: hidden; position: relative;
+      flex-shrink: 0;
+    }
+    .phone-notch {
+      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+      width: 80px; height: 6px; background: rgba(255,255,255,.1); border-radius: 3px; z-index: 2;
+    }
+    .phone-screen {
+      width: 100%; height: 100%;
+      background: linear-gradient(180deg, #1A1A2E 0%, #0F0F1A 100%);
+      display: flex; flex-direction: column;
+    }
+    .phone-topbar {
+      height: 52px; background: var(--red);
+      display: flex; align-items: center; padding: 0 16px; gap: 8px;
+    }
+    .phone-topbar-title { font-size: 13px; font-weight: 700; color: #fff; }
+    .phone-body { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+    .phone-card {
+      background: rgba(255,255,255,.05); border-radius: 10px; padding: 12px;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .phone-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .phone-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .phone-card-title { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.8); }
+    .phone-progress-bar {
+      height: 4px; background: rgba(255,255,255,.08); border-radius: 2px; margin-bottom: 8px;
+    }
+    .phone-progress-fill { height: 100%; border-radius: 2px; background: var(--red); }
+    .phone-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+    .phone-item:last-child { border-bottom: none; }
+    .phone-check {
+      width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0;
+      border: 1.5px solid rgba(255,255,255,.2);
+    }
+    .phone-check.done { background: var(--red); border-color: var(--red); }
+    .phone-item-text { font-size: 10px; color: rgba(255,255,255,.6); }
+    .phone-item-text.done { color: rgba(255,255,255,.3); text-decoration: line-through; }
+
+    .desktop-frame {
+      position: absolute; right: -30px; bottom: -20px;
+      width: 360px; height: 220px;
+      background: var(--dark-3); border-radius: 14px;
+      border: 1.5px solid rgba(255,255,255,.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+      overflow: hidden;
+    }
+    .desktop-topbar {
+      height: 32px; background: rgba(255,255,255,.04);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      display: flex; align-items: center; padding: 0 12px; gap: 6px;
+    }
+    .desktop-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .desktop-body { padding: 12px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .desktop-stat {
+      background: rgba(255,255,255,.04); border-radius: 8px; padding: 10px;
+      border: 1px solid rgba(255,255,255,.06); text-align: center;
+    }
+    .desktop-stat-value { font-size: 18px; font-weight: 800; color: #fff; }
+    .desktop-stat-label { font-size: 9px; color: rgba(255,255,255,.4); margin-top: 2px; }
+    .desktop-chart { grid-column: 1 / -1; height: 60px; position: relative; }
+    .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 100%; }
+    .chart-bar {
+      flex: 1; border-radius: 3px 3px 0 0;
+      background: rgba(229,57,53,.4);
+    }
+    .chart-bar.active { background: var(--red); }
+
+    .floating-notif {
+      position: absolute; top: 30px; right: -40px;
+      background: var(--dark-3); border-radius: 12px; padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,.08); box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      display: flex; align-items: center; gap: 10px;
+      animation: float 3s ease-in-out infinite;
+      min-width: 200px;
+    }
+    .notif-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--green); display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .notif-text { font-size: 11px; }
+    .notif-title { font-weight: 700; color: #fff; }
+    .notif-body { color: rgba(255,255,255,.5); }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-6px); }
+    }
+
+    /* ── Problema / Solução ──────────────────────── */
+    #problema {
+      padding: 100px 0;
+      background: var(--surface-2);
+    }
+    .problem-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+    }
+    .problem-side h2 { text-align: left; font-size: clamp(26px, 3.5vw, 36px); margin-bottom: 20px; }
+    .problem-side p { font-size: 16px; line-height: 1.7; color: var(--text-muted); margin-bottom: 28px; }
+    .pain-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .pain-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      font-size: 15px; line-height: 1.5; color: var(--text);
+    }
+    .pain-icon {
+      width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0; margin-top: 1px;
+      display: flex; align-items: center; justify-content: center; font-size: 12px;
+    }
+    .pain-icon.bad  { background: #FEE2E2; color: #DC2626; }
+    .pain-icon.good { background: #DCFCE7; color: #16A34A; }
+
+    .solution-side {
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
+      border-radius: var(--radius-lg); padding: 40px;
+      color: #fff; position: relative; overflow: hidden;
+    }
+    .solution-side::before {
+      content: '';
+      position: absolute; top: -40px; right: -40px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: rgba(229,57,53,.15);
+    }
+    .solution-side h3 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+    .solution-side p { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,.6); margin-bottom: 24px; }
+    .solution-steps { display: flex; flex-direction: column; gap: 16px; }
+    .solution-step { display: flex; align-items: flex-start; gap: 14px; }
+    .step-number {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--red); color: #fff; font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .step-content strong { display: block; font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+    .step-content span { font-size: 13px; color: rgba(255,255,255,.5); }
+
+    /* ── Funcionalidades ─────────────────────────── */
+    #funcionalidades { padding: 100px 0; }
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 28px;
+      transition: all .25s ease; cursor: default;
+    }
+    .feature-card:hover {
+      border-color: var(--red); box-shadow: 0 8px 32px rgba(229,57,53,.1);
+      transform: translateY(-4px);
+    }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 16px;
+    }
+    .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .feature-card p { font-size: 14px; line-height: 1.65; color: var(--text-muted); }
+
+    /* ── Como funciona ───────────────────────────── */
+    #como-funciona {
+      padding: 100px 0;
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
+      color: #fff;
+    }
+    #como-funciona h2 { color: #fff; }
+    #como-funciona .section-sub { color: rgba(255,255,255,.6); }
+
+    .flow-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 0; position: relative;
+    }
+    .flow-side { padding: 20px 0; }
+    .flow-side-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+      margin-bottom: 32px;
+    }
+    .flow-pill {
+      font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 100px;
+    }
+    .pill-emp  { background: rgba(229,57,53,.2); color: #FF7070; }
+    .pill-mgr  { background: rgba(255,143,0,.2); color: var(--amber); }
+
+    .flow-steps { display: flex; flex-direction: column; gap: 0; }
+    .flow-step {
+      display: flex; gap: 20px; padding: 20px 0;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .flow-step:last-child { border-bottom: none; }
+    .flow-step-num {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800;
+    }
+    .num-emp { background: rgba(229,57,53,.2); color: #FF7070; }
+    .num-mgr { background: rgba(255,143,0,.2); color: var(--amber); }
+    .flow-step-body strong { display: block; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .flow-step-body span { font-size: 13px; color: rgba(255,255,255,.5); line-height: 1.5; }
+
+    .flow-divider {
+      width: 1px; background: rgba(255,255,255,.08);
+      margin: 0 40px;
+    }
+
+    /* ── Stats ───────────────────────────────────── */
+    #stats { padding: 80px 0; background: var(--red); }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    }
+    .stat-item {
+      text-align: center; padding: 0 20px;
+      border-right: 1px solid rgba(255,255,255,.2);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-value { font-size: clamp(36px, 5vw, 52px); font-weight: 900; color: #fff; line-height: 1; }
+    .stat-label { font-size: 14px; color: rgba(255,255,255,.75); margin-top: 8px; font-weight: 500; }
+
+    /* ── Para quem é ─────────────────────────────── */
+    #para-quem { padding: 100px 0; background: var(--surface-2); }
+    .personas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .persona-card {
+      border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    .persona-header {
+      padding: 32px 32px 24px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .persona-header.emp { background: linear-gradient(135deg, #1A1A2E, #2D0A0A); }
+    .persona-header.mgr { background: linear-gradient(135deg, #1A2A1A, #1A1A0A); }
+    .persona-avatar {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+    }
+    .persona-info strong { display: block; font-size: 18px; font-weight: 800; color: #fff; }
+    .persona-info span { font-size: 13px; color: rgba(255,255,255,.5); }
+    .persona-body { background: #fff; padding: 28px 32px; }
+    .persona-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .persona-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; line-height: 1.5; color: var(--text);
+    }
+    .persona-list li::before { content: '✓'; color: var(--green); font-weight: 800; flex-shrink: 0; margin-top: 0px; }
+
+    /* ── Plataformas ─────────────────────────────── */
+    #plataformas { padding: 80px 0; }
+    .platforms-row {
+      display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap;
+    }
+    .platform-item {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 24px 32px; border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg); min-width: 130px; text-align: center;
+      transition: all .2s;
+    }
+    .platform-item:hover { border-color: var(--red); box-shadow: 0 4px 20px rgba(229,57,53,.1); }
+    .platform-icon { font-size: 32px; }
+    .platform-name { font-size: 14px; font-weight: 700; }
+    .platform-note { font-size: 11px; color: var(--text-muted); }
+
+    /* ── Stack técnica ───────────────────────────── */
+    #stack { padding: 80px 0; background: var(--surface-2); }
+    .stack-badges {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 8px;
+    }
+    .stack-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      padding: 10px 18px; border-radius: 100px; font-size: 14px; font-weight: 600;
+    }
+    .stack-badge img { width: 18px; height: 18px; }
+    .stack-note {
+      text-align: center; margin-top: 24px; font-size: 13px; color: var(--text-muted);
+    }
+
+    /* ── Segurança ───────────────────────────────── */
+    #seguranca { padding: 100px 0; }
+    .security-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    }
+    .security-card {
+      background: var(--dark); border-radius: var(--radius-lg); padding: 28px;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .security-card .icon { font-size: 28px; margin-bottom: 14px; }
+    .security-card h3 { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .security-card p { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,.5); }
+
+    /* ── CTA ─────────────────────────────────────── */
+    #cta {
+      padding: 120px 0;
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
+      text-align: center; position: relative; overflow: hidden;
+    }
+    #cta::before {
+      content: '';
+      position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(229,57,53,.15) 0%, transparent 70%);
+    }
+    #cta h2 { color: #fff; font-size: clamp(32px, 5vw, 52px); margin-bottom: 16px; }
+    #cta p { color: rgba(255,255,255,.6); font-size: 17px; margin-bottom: 40px; max-width: 500px; margin-left: auto; margin-right: auto; }
+    .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── Footer ──────────────────────────────────── */
+    footer {
+      background: #0A0A12; color: rgba(255,255,255,.4);
+      padding: 48px 0;
+    }
+    .footer-inner {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
+    }
+    .footer-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 16px; font-weight: 800; color: rgba(255,255,255,.7);
+      text-decoration: none;
+    }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 13px; color: rgba(255,255,255,.4); text-decoration: none; }
+    .footer-links a:hover { color: rgba(255,255,255,.7); }
+    .footer-copy { font-size: 13px; }
+
+    /* ── Animações de entrada ────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── Responsividade ──────────────────────────── */
+    @media (max-width: 900px) {
+      .hero-grid, .problem-grid, .flow-grid, .personas-grid { grid-template-columns: 1fr; }
+      .features-grid, .security-grid { grid-template-columns: 1fr 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .stat-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,.2); padding: 20px; }
+      .stat-item:nth-child(2n) { border-right: none; }
+      .stat-item:nth-child(3), .stat-item:nth-child(4) { border-bottom: none; }
+      .desktop-frame { display: none; }
+      .floating-notif { right: -10px; }
+      .flow-divider { display: none; }
+      .nav-links, .nav-cta .btn-ghost { display: none; }
+      .hamburger { display: flex; }
+    }
+    @media (max-width: 600px) {
+      .features-grid, .security-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .hero-actions { flex-direction: column; }
+      .hero-actions .btn { width: 100%; justify-content: center; }
+      .phone-frame { width: 220px; height: 440px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────────────────────── -->
+<nav id="navbar">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <div class="logo-icon">🍕</div>
+        Pizzaria Check-In
+      </a>
+      <ul class="nav-links">
+        <li><a href="#funcionalidades">Funcionalidades</a></li>
+        <li><a href="#como-funciona">Como funciona</a></li>
+        <li><a href="#para-quem">Para quem</a></li>
+        <li><a href="#seguranca">Segurança</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="#cta" class="btn btn-primary">Solicitar demo</a>
+      </div>
+      <div class="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content">
+        <div class="hero-eyebrow">Gestão de turno digital</div>
+        <h1>Chega de<br><span>WhatsApp</span> para<br>controlar turnos</h1>
+        <p class="hero-sub">
+          Seu time registra as tarefas do turno com foto, você aprova em tempo real e tem histórico completo de tudo. Do celular ao desktop.
+        </p>
+        <div class="hero-actions">
+          <a href="#cta" class="btn btn-primary">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Solicitar demo gratuita
+          </a>
+          <a href="#como-funciona" class="btn btn-ghost">Ver como funciona</a>
+        </div>
+        <div class="hero-badges">
+          <div class="hero-badge">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            Funciona no celular
+          </div>
+          <div class="hero-badge">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Sem treinamento
+          </div>
+          <div class="hero-badge">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            Dados seguros
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <!-- Notificação flutuante -->
+        <div class="floating-notif">
+          <div class="notif-icon">✅</div>
+          <div class="notif-text">
+            <div class="notif-title">Checklist aprovado!</div>
+            <div class="notif-body">Delivery · Abertura · agora</div>
+          </div>
+        </div>
+
+        <!-- Tela do celular -->
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="phone-topbar">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+              <div class="phone-topbar-title">Delivery · Abertura</div>
+            </div>
+            <div class="phone-body">
+              <div class="phone-card">
+                <div class="phone-card-header">
+                  <div class="phone-dot" style="background:#E53935"></div>
+                  <div class="phone-card-title">Progresso: 8 / 11</div>
+                </div>
+                <div class="phone-progress-bar">
+                  <div class="phone-progress-fill" style="width:72%"></div>
+                </div>
+              </div>
+              <div class="phone-card">
+                <div class="phone-item"><div class="phone-check done"></div><div class="phone-item-text done">Bater ponto de entrada</div></div>
+                <div class="phone-item"><div class="phone-check done"></div><div class="phone-item-text done">Ligar PC e abrir turno</div></div>
+                <div class="phone-item"><div class="phone-check done"></div><div class="phone-item-text done">Verificar maquininhas</div></div>
+                <div class="phone-item"><div class="phone-check done"></div><div class="phone-item-text done">Verificar impressoras</div></div>
+                <div class="phone-item"><div class="phone-check"></div><div class="phone-item-text">Abrir Neemo e Ifood</div></div>
+                <div class="phone-item"><div class="phone-check"></div><div class="phone-item-text">Conferir escala de motoboys</div></div>
+                <div class="phone-item"><div class="phone-check"></div><div class="phone-item-text">Encher a geladeira</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tela do desktop (dashboard gestor) -->
+        <div class="desktop-frame">
+          <div class="desktop-topbar">
+            <div class="desktop-dot" style="background:#FF5F57"></div>
+            <div class="desktop-dot" style="background:#FEBC2E"></div>
+            <div class="desktop-dot" style="background:#28C840"></div>
+          </div>
+          <div class="desktop-body">
+            <div class="desktop-stat">
+              <div class="desktop-stat-value" style="color:#E53935">3</div>
+              <div class="desktop-stat-label">Pendentes</div>
+            </div>
+            <div class="desktop-stat">
+              <div class="desktop-stat-value" style="color:#22C55E">18</div>
+              <div class="desktop-stat-label">Aprovados</div>
+            </div>
+            <div class="desktop-stat">
+              <div class="desktop-stat-value">94%</div>
+              <div class="desktop-stat-label">Conclusão</div>
+            </div>
+            <div class="desktop-chart">
+              <div class="chart-bars">
+                <div class="chart-bar" style="height:40%"></div>
+                <div class="chart-bar" style="height:65%"></div>
+                <div class="chart-bar" style="height:50%"></div>
+                <div class="chart-bar" style="height:80%"></div>
+                <div class="chart-bar active" style="height:94%"></div>
+                <div class="chart-bar" style="height:70%"></div>
+                <div class="chart-bar" style="height:85%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Problema / Solução ───────────────────────────────────────────────────── -->
+<section id="problema">
+  <div class="container">
+    <div class="problem-grid">
+      <div class="problem-side reveal">
+        <div class="tag" style="margin-bottom:16px">O problema</div>
+        <h2>Planilha não é sistema. WhatsApp não é gestão.</h2>
+        <p>
+          A maioria dos restaurantes ainda controla turnos com anotações em papel, grupos de mensagem ou planilhas compartilhadas. O resultado é sempre o mesmo.
+        </p>
+        <ul class="pain-list">
+          <li class="pain-item">
+            <div class="pain-icon bad">✕</div>
+            "Fiz sim, juro" — sem nenhuma evidência para provar
+          </li>
+          <li class="pain-item">
+            <div class="pain-icon bad">✕</div>
+            Tarefa esquecida que o cliente vai encontrar antes de você
+          </li>
+          <li class="pain-item">
+            <div class="pain-icon bad">✕</div>
+            Histórico perdido em grupos de WhatsApp que ninguém lê
+          </li>
+          <li class="pain-item">
+            <div class="pain-icon bad">✕</div>
+            Gestor fica refém de estar presente para saber o que aconteceu
+          </li>
+        </ul>
+      </div>
+
+      <div class="solution-side reveal">
+        <div class="tag" style="background:rgba(229,57,53,.15);color:#FF7070;margin-bottom:20px">A solução</div>
+        <h3>Digitalizado, rastreável e em tempo real</h3>
+        <p>O funcionário registra tudo no app. Você vê, aprova e tem histórico permanente.</p>
+        <div class="solution-steps">
+          <div class="solution-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <strong>Funcionário abre o checklist do turno</strong>
+              <span>Cada setor tem sua lista específica de abertura e fechamento</span>
+            </div>
+          </div>
+          <div class="solution-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <strong>Marca os itens com foto quando necessário</strong>
+              <span>Câmera do celular ou upload — evidência salva na nuvem</span>
+            </div>
+          </div>
+          <div class="solution-step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <strong>Envia para revisão do gestor</strong>
+              <span>Com observação geral do turno se necessário</span>
+            </div>
+          </div>
+          <div class="solution-step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <strong>Gestor aprova ou rejeita com comentário</strong>
+              <span>Notificação em tempo real — histórico auditável para sempre</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Funcionalidades ──────────────────────────────────────────────────────── -->
+<section id="funcionalidades">
+  <div class="container">
+    <div class="section-label"><span class="tag">Funcionalidades</span></div>
+    <h2 class="section-title">Tudo que você precisa, sem o que você não precisa</h2>
+    <p class="section-sub">Desenvolvido especificamente para a rotina de restaurantes — não é um software genérico adaptado.</p>
+
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon" style="background:#FEE2E2">📋</div>
+        <h3>Checklists por turno e setor</h3>
+        <p>Cada departamento tem seus próprios modelos de Abertura e Fechamento, com itens específicos configurados pelo gestor.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon" style="background:#DCFCE7">📸</div>
+        <h3>Evidência fotográfica</h3>
+        <p>Itens críticos exigem foto obrigatória. O funcionário tira pela câmera do celular — a imagem fica vinculada ao item e ao turno.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon" style="background:#FEF3C7">🔔</div>
+        <h3>Notificações em tempo real</h3>
+        <p>Via WebSocket — gestor recebe alerta de envio, funcionário recebe resultado da revisão. Tudo instantâneo, sem precisar atualizar a página.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon" style="background:#EDE9FE">📊</div>
+        <h3>Dashboard com 5 abas</h3>
+        <p>Pendentes com urgência por cor, histórico completo com filtros, ranking da equipe, gestão de modelos e análise de desempenho por item.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon" style="background:#DBEAFE">📤</div>
+        <h3>Exportação CSV</h3>
+        <p>Exporte qualquer período filtrado por departamento, status ou funcionário para análise em planilha ou relatório gerencial.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon" style="background:#FCE7F3">🏆</div>
+        <h3>Streak e ranking de equipe</h3>
+        <p>Engajamento natural — funcionários veem seus dias consecutivos e o gestor acompanha quem está em dia e quem precisa de atenção.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Como funciona ────────────────────────────────────────────────────────── -->
+<section id="como-funciona">
+  <div class="container">
+    <div class="section-label"><span class="tag" style="background:rgba(229,57,53,.2);color:#FF7070">Fluxo</span></div>
+    <h2 class="section-title">Como funciona na prática</h2>
+    <p class="section-sub">Dois papéis, uma plataforma. O fluxo inteiro acontece em menos de 5 minutos por turno.</p>
+
+    <div class="flow-grid reveal">
+      <div class="flow-side">
+        <div class="flow-side-title">
+          <span class="flow-pill pill-emp">Funcionário</span>
+        </div>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num num-emp">1</div>
+            <div class="flow-step-body">
+              <strong>Abre o app no início do turno</strong>
+              <span>O checklist do setor e do turno já está lá, pronto para marcar</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num num-emp">2</div>
+            <div class="flow-step-body">
+              <strong>Marca cada item conforme executa</strong>
+              <span>Concluído ou N/A — pode adicionar nota individual por item</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num num-emp">3</div>
+            <div class="flow-step-body">
+              <strong>Tira foto nos itens que exigem evidência</strong>
+              <span>Direto pela câmera do celular — foto salva na nuvem automaticamente</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num num-emp">4</div>
+            <div class="flow-step-body">
+              <strong>Envia para revisão e recebe confirmação</strong>
+              <span>Notificação de aprovação ou rejeição chega em tempo real</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-divider"></div>
+
+      <div class="flow-side">
+        <div class="flow-side-title">
+          <span class="flow-pill pill-mgr">Gestor</span>
+        </div>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num num-mgr">1</div>
+            <div class="flow-step-body">
+              <strong>Recebe notificação de checklist enviado</strong>
+              <span>Badge de pendentes atualiza em tempo real — pode estar em qualquer lugar</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num num-mgr">2</div>
+            <div class="flow-step-body">
+              <strong>Abre a página de revisão</strong>
+              <span>Vê todos os itens, fotos em galeria e observação do funcionário</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num num-mgr">3</div>
+            <div class="flow-step-body">
+              <strong>Aprova ou rejeita com comentário</strong>
+              <span>Funcionário recebe a resposta instantaneamente no app</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num num-mgr">4</div>
+            <div class="flow-step-body">
+              <strong>Acompanha indicadores no dashboard</strong>
+              <span>Mapa de calor semanal, ranking da equipe, taxa de aprovação e análise por item</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Stats ────────────────────────────────────────────────────────────────── -->
+<section id="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value">6</div>
+        <div class="stat-label">Setores configurados de fábrica</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">12</div>
+        <div class="stat-label">Templates pré-carregados</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">100%</div>
+        <div class="stat-label">Rastreável e auditável</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">0</div>
+        <div class="stat-label">Planilhas necessárias</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Para quem é ──────────────────────────────────────────────────────────── -->
+<section id="para-quem">
+  <div class="container">
+    <div class="section-label"><span class="tag">Para quem</span></div>
+    <h2 class="section-title">Dois perfis, uma plataforma</h2>
+    <p class="section-sub">Cada tela foi pensada para o contexto de quem está usando — no balcão ou no escritório.</p>
+
+    <div class="personas-grid">
+      <div class="persona-card reveal">
+        <div class="persona-header emp">
+          <div class="persona-avatar">👨‍🍳</div>
+          <div class="persona-info">
+            <strong>Funcionário</strong>
+            <span>Operação · Linha de frente</span>
+          </div>
+        </div>
+        <div class="persona-body">
+          <ul class="persona-list">
+            <li>Vê somente os checklists do seu setor e turno</li>
+            <li>Interface simples — funciona no celular pessoal</li>
+            <li>Tira foto de evidência na hora, sem sair do app</li>
+            <li>Recebe feedback imediato de aprovação ou rejeição</li>
+            <li>Acompanha seu histórico e streak de dias consecutivos</li>
+            <li>Notificação quando o gestor enviar um lembrete</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="persona-card reveal">
+        <div class="persona-header mgr">
+          <div class="persona-avatar">👔</div>
+          <div class="persona-info">
+            <strong>Gestor / Administrador</strong>
+            <span>Gestão · Supervisão</span>
+          </div>
+        </div>
+        <div class="persona-body">
+          <ul class="persona-list">
+            <li>Visão completa de todos os setores e funcionários</li>
+            <li>Dashboard com pendentes, histórico e análise</li>
+            <li>Revisão com galeria de fotos e comentário de retorno</li>
+            <li>Envio de lembrete para quem ainda não preencheu</li>
+            <li>Gestão completa de usuários, departamentos e modelos</li>
+            <li>Exportação CSV para relatórios gerenciais</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Plataformas ──────────────────────────────────────────────────────────── -->
+<section id="plataformas">
+  <div class="container">
+    <div class="section-label"><span class="tag">Multiplataforma</span></div>
+    <h2 class="section-title">Funciona em qualquer dispositivo</h2>
+    <p class="section-sub">Um único sistema, acessível de onde o time estiver — sem instalar nada além de abrir o navegador.</p>
+
+    <div class="platforms-row reveal">
+      <div class="platform-item">
+        <div class="platform-icon">📱</div>
+        <div class="platform-name">Android</div>
+        <div class="platform-note">Instala como app (PWA)</div>
+      </div>
+      <div class="platform-item">
+        <div class="platform-icon">🍎</div>
+        <div class="platform-name">iPhone / iPad</div>
+        <div class="platform-note">Safari · Adicionar à tela</div>
+      </div>
+      <div class="platform-item">
+        <div class="platform-icon">🖥️</div>
+        <div class="platform-name">Windows</div>
+        <div class="platform-note">App nativo ou navegador</div>
+      </div>
+      <div class="platform-item">
+        <div class="platform-icon">🌐</div>
+        <div class="platform-name">Qualquer navegador</div>
+        <div class="platform-note">Chrome, Edge, Safari, Firefox</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Stack ────────────────────────────────────────────────────────────────── -->
+<section id="stack">
+  <div class="container">
+    <div class="section-label"><span class="tag">Tecnologia</span></div>
+    <h2 class="section-title">Construído com tecnologias modernas</h2>
+    <p class="section-sub">Stack Python full-stack com banco PostgreSQL, API assíncrona e interface Flutter compilada para web.</p>
+
+    <div class="stack-badges reveal">
+      <div class="stack-badge">🐍 Python 3.12</div>
+      <div class="stack-badge">⚡ FastAPI</div>
+      <div class="stack-badge">🦋 Flet · Flutter Web</div>
+      <div class="stack-badge">🐘 PostgreSQL 16</div>
+      <div class="stack-badge">🔐 JWT + bcrypt</div>
+      <div class="stack-badge">🔌 WebSocket</div>
+      <div class="stack-badge">🐳 Docker Compose</div>
+    </div>
+    <p class="stack-note">Pode ser hospedado em qualquer VPS Linux · Docker · Railway · Fly.io · etc.</p>
+  </div>
+</section>
+
+<!-- ── Segurança ────────────────────────────────────────────────────────────── -->
+<section id="seguranca">
+  <div class="container">
+    <div class="section-label"><span class="tag">Segurança</span></div>
+    <h2 class="section-title">Segurança e conformidade por padrão</h2>
+    <p class="section-sub">Desenvolvido com práticas de segurança desde a base — não como afterthought.</p>
+
+    <div class="security-grid">
+      <div class="security-card reveal">
+        <div class="icon">🔒</div>
+        <h3>Autenticação JWT + bcrypt</h3>
+        <p>Senhas armazenadas com hash bcrypt. Tokens com expiração configurável. Usuários desativados são bloqueados em todas as rotas imediatamente.</p>
+      </div>
+      <div class="security-card reveal">
+        <div class="icon">🛡️</div>
+        <h3>Validação de uploads</h3>
+        <p>Imagens validadas por magic bytes (JPEG, PNG, WebP) — não apenas pela extensão. Limite de 3 MB por arquivo. Nomes gerados por UUID.</p>
+      </div>
+      <div class="security-card reveal">
+        <div class="icon">🔏</div>
+        <h3>LGPD — Termos e Privacidade</h3>
+        <p>Páginas de Termos de Uso e Política de Privacidade incluídas, com base legal definida (Art. 7º, V da LGPD — execução de contrato).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA Final ────────────────────────────────────────────────────────────── -->
+<section id="cta">
+  <div class="container" style="position:relative;z-index:1">
+    <div class="tag" style="background:rgba(229,57,53,.2);color:#FF7070;margin-bottom:20px">Comece agora</div>
+    <h2>Seu time merece uma<br>ferramenta de verdade</h2>
+    <p>
+      Substitua WhatsApp e planilha por um sistema que funciona. Implantação em um dia, sem treinamento técnico.
+    </p>
+    <div class="cta-actions">
+      <a href="mailto:flavios.silva1984@gmail.com?subject=Demo%20Pizzaria%20Check-In" class="btn btn-primary">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        Solicitar demo gratuita
+      </a>
+      <a href="https://github.com/flavios-silva/pizzaria-checkin" class="btn btn-ghost" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        Ver no GitHub
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ───────────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <a href="#" class="footer-logo">
+        <div class="logo-icon" style="width:28px;height:28px;font-size:14px">🍕</div>
+        Pizzaria Check-In
+      </a>
+      <div class="footer-links">
+        <a href="#funcionalidades">Funcionalidades</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#seguranca">Segurança</a>
+        <a href="mailto:flavios.silva1984@gmail.com">Contato</a>
+      </div>
+      <div class="footer-copy">© 2025 · Todos os direitos reservados</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ── Navbar scroll ──────────────────────────────────────────────────────────
+  const nav = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  // ── Reveal on scroll ──────────────────────────────────────────────────────
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+    { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+  );
+  reveals.forEach(el => observer.observe(el));
+
+  // ── Mobile menu (simples) ─────────────────────────────────────────────────
+  function toggleMenu() {
+    const links = document.querySelector('.nav-links');
+    const cta = document.querySelector('.nav-cta');
+    if (!links) return;
+    const open = links.style.display === 'flex';
+    if (open) {
+      links.style.display = '';
+      cta.style.display = '';
+    } else {
+      links.style.display = 'flex';
+      links.style.flexDirection = 'column';
+      links.style.position = 'fixed';
+      links.style.top = '64px';
+      links.style.left = '0';
+      links.style.right = '0';
+      links.style.background = 'rgba(15,15,26,.97)';
+      links.style.padding = '20px 24px';
+      links.style.gap = '20px';
+      links.style.backdropFilter = 'blur(16px)';
+    }
+  }
+
+  // ── Smooth scroll para links internos ────────────────────────────────────
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // fechar mobile menu se aberto
+        document.querySelector('.nav-links') && (document.querySelector('.nav-links').style.display = '');
+      }
+    });
+  });
+
+  // ── Contador animado nos stats ────────────────────────────────────────────
+  const statsSection = document.getElementById('stats');
+  let counted = false;
+  new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && !counted) {
+      counted = true;
+      document.querySelectorAll('.stat-value').forEach(el => {
+        const raw = el.textContent.trim();
+        const suffix = raw.replace(/[\d]/g, '');
+        const target = parseInt(raw) || 0;
+        if (!target) return;
+        let current = 0;
+        const step = Math.ceil(target / 40);
+        const timer = setInterval(() => {
+          current = Math.min(current + step, target);
+          el.textContent = current + suffix;
+          if (current >= target) clearInterval(timer);
+        }, 30);
+      });
+    }
+  }, { threshold: 0.5 }).observe(statsSection);
+</script>
+</body>
+</html>
