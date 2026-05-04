@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pizzaria Check-In — Gestão de turnos sem planilha e sem WhatsApp</title>
   <meta name="description" content="Sistema digital de checklists de turno para restaurantes. Funcionários registram tarefas com foto, gestores aprovam em tempo real. Funciona no celular como app." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍕</text></svg>" />
+  <meta property="og:title" content="Pizzaria Check-In — Gestão de turnos sem planilha e sem WhatsApp" />
+  <meta property="og:description" content="Sistema digital de checklists de turno para restaurantes. Funcionários registram tarefas com foto, gestores aprovam em tempo real." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -39,6 +44,13 @@
       color: var(--text);
       background: var(--surface);
       overflow-x: hidden;
+    }
+
+    /* ── Foco acessível ──────────────────────────────── */
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--red);
+      outline-offset: 3px;
+      border-radius: 4px;
     }
 
     /* ── Utilitários ─────────────────────────────── */
@@ -120,7 +132,16 @@
     nav.scrolled .nav-links a:hover { color: var(--red); }
     .nav-cta { display: flex; align-items: center; gap: 12px; }
     .nav-cta .btn { padding: 10px 22px; font-size: 14px; }
-    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+
+    /* hamburger como <button> */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 4px;
+      background: none; border: none; -webkit-appearance: none;
+      border-radius: 4px;
+    }
+    .hamburger:focus-visible { outline: 2px solid rgba(255,255,255,.5); outline-offset: 2px; }
+    nav.scrolled .hamburger:focus-visible { outline-color: var(--red); }
     .hamburger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all .3s; }
     nav.scrolled .hamburger span { background: var(--text); }
 
@@ -176,7 +197,9 @@
       position: relative; display: flex; justify-content: center;
     }
     .phone-frame {
-      width: 260px; height: 520px;
+      width: 260px;
+      aspect-ratio: 1 / 2;
+      height: auto;
       background: var(--dark-3);
       border-radius: 36px;
       border: 2px solid rgba(255,255,255,.08);
@@ -501,7 +524,7 @@
       font-size: 16px; font-weight: 800; color: rgba(255,255,255,.7);
       text-decoration: none;
     }
-    .footer-links { display: flex; gap: 24px; }
+    .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
     .footer-links a { font-size: 13px; color: rgba(255,255,255,.4); text-decoration: none; }
     .footer-links a:hover { color: rgba(255,255,255,.7); }
     .footer-copy { font-size: 13px; }
@@ -512,6 +535,32 @@
       transition: opacity .6s ease, transform .6s ease;
     }
     .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── Modal ───────────────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.7); overflow-y: auto; padding: 40px 16px;
+    }
+    .modal-overlay.open { display: block; }
+    .modal-box {
+      max-width: 640px; margin: 0 auto;
+      background: var(--surface); border-radius: 16px; padding: 40px;
+      position: relative;
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 24px;
+    }
+    .modal-header h2 { font-size: 22px; font-weight: 800; }
+    .modal-close {
+      background: none; border: none; cursor: pointer;
+      font-size: 28px; line-height: 1; color: var(--text-muted);
+      padding: 4px 8px; border-radius: 6px;
+    }
+    .modal-close:hover { background: var(--surface-2); }
+    .modal-body { font-size: 14px; line-height: 1.8; color: var(--text-muted); }
+    .modal-body h3 { font-size: 15px; font-weight: 700; color: var(--text); margin: 20px 0 8px; }
+    .modal-body p { margin-bottom: 12px; }
 
     /* ── Responsividade ──────────────────────────── */
     @media (max-width: 900px) {
@@ -524,15 +573,30 @@
       .desktop-frame { display: none; }
       .floating-notif { right: -10px; }
       .flow-divider { display: none; }
-      .nav-links, .nav-cta .btn-ghost { display: none; }
       .hamburger { display: flex; }
+
+      /* menu mobile via classe CSS — sem inline style */
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        position: fixed;
+        top: 70px; left: 0; right: 0;
+        background: rgba(15,15,26,.97);
+        backdrop-filter: blur(16px);
+        padding: 24px; gap: 20px;
+        z-index: 99;
+        list-style: none;
+      }
+      body.menu-open .nav-links { display: flex; }
+      body.menu-open { overflow: hidden; }
     }
     @media (max-width: 600px) {
       .features-grid, .security-grid { grid-template-columns: 1fr; }
       .stats-grid { grid-template-columns: 1fr 1fr; }
       .hero-actions { flex-direction: column; }
       .hero-actions .btn { width: 100%; justify-content: center; }
-      .phone-frame { width: 220px; height: 440px; }
+      .phone-frame { width: 220px; }
+      .floating-notif { right: 4px; top: 4px; transform: scale(0.85); transform-origin: top right; animation: none; }
     }
   </style>
 </head>
@@ -542,8 +606,8 @@
 <nav id="navbar">
   <div class="container">
     <div class="nav-inner">
-      <a href="#" class="nav-logo">
-        <div class="logo-icon">🍕</div>
+      <a href="#hero" class="nav-logo">
+        <div class="logo-icon" aria-hidden="true">🍕</div>
         Pizzaria Check-In
       </a>
       <ul class="nav-links">
@@ -555,9 +619,9 @@
       <div class="nav-cta">
         <a href="#cta" class="btn btn-primary">Solicitar demo</a>
       </div>
-      <div class="hamburger" onclick="toggleMenu()">
+      <button class="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav-menu">
         <span></span><span></span><span></span>
-      </div>
+      </button>
     </div>
   </div>
 </nav>
@@ -574,22 +638,22 @@
         </p>
         <div class="hero-actions">
           <a href="#cta" class="btn btn-primary">
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             Solicitar demo gratuita
           </a>
           <a href="#como-funciona" class="btn btn-ghost">Ver como funciona</a>
         </div>
         <div class="hero-badges">
           <div class="hero-badge">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
             Funciona no celular
           </div>
           <div class="hero-badge">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             Sem treinamento
           </div>
           <div class="hero-badge">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             Dados seguros
           </div>
         </div>
@@ -597,7 +661,7 @@
 
       <div class="hero-visual">
         <!-- Notificação flutuante -->
-        <div class="floating-notif">
+        <div class="floating-notif" aria-hidden="true">
           <div class="notif-icon">✅</div>
           <div class="notif-text">
             <div class="notif-title">Checklist aprovado!</div>
@@ -606,11 +670,11 @@
         </div>
 
         <!-- Tela do celular -->
-        <div class="phone-frame">
+        <div class="phone-frame" aria-hidden="true">
           <div class="phone-notch"></div>
           <div class="phone-screen">
             <div class="phone-topbar">
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
               <div class="phone-topbar-title">Delivery · Abertura</div>
             </div>
             <div class="phone-body">
@@ -637,7 +701,7 @@
         </div>
 
         <!-- Tela do desktop (dashboard gestor) -->
-        <div class="desktop-frame">
+        <div class="desktop-frame" aria-hidden="true">
           <div class="desktop-topbar">
             <div class="desktop-dot" style="background:#FF5F57"></div>
             <div class="desktop-dot" style="background:#FEBC2E"></div>
@@ -686,19 +750,19 @@
         </p>
         <ul class="pain-list">
           <li class="pain-item">
-            <div class="pain-icon bad">✕</div>
+            <div class="pain-icon bad" aria-hidden="true">✕</div>
             "Fiz sim, juro" — sem nenhuma evidência para provar
           </li>
           <li class="pain-item">
-            <div class="pain-icon bad">✕</div>
+            <div class="pain-icon bad" aria-hidden="true">✕</div>
             Tarefa esquecida que o cliente vai encontrar antes de você
           </li>
           <li class="pain-item">
-            <div class="pain-icon bad">✕</div>
+            <div class="pain-icon bad" aria-hidden="true">✕</div>
             Histórico perdido em grupos de WhatsApp que ninguém lê
           </li>
           <li class="pain-item">
-            <div class="pain-icon bad">✕</div>
+            <div class="pain-icon bad" aria-hidden="true">✕</div>
             Gestor fica refém de estar presente para saber o que aconteceu
           </li>
         </ul>
@@ -752,32 +816,32 @@
 
     <div class="features-grid">
       <div class="feature-card reveal">
-        <div class="feature-icon" style="background:#FEE2E2">📋</div>
+        <div class="feature-icon" style="background:#FEE2E2" aria-hidden="true">📋</div>
         <h3>Checklists por turno e setor</h3>
         <p>Cada departamento tem seus próprios modelos de Abertura e Fechamento, com itens específicos configurados pelo gestor.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon" style="background:#DCFCE7">📸</div>
+        <div class="feature-icon" style="background:#DCFCE7" aria-hidden="true">📸</div>
         <h3>Evidência fotográfica</h3>
         <p>Itens críticos exigem foto obrigatória. O funcionário tira pela câmera do celular — a imagem fica vinculada ao item e ao turno.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon" style="background:#FEF3C7">🔔</div>
+        <div class="feature-icon" style="background:#FEF3C7" aria-hidden="true">🔔</div>
         <h3>Notificações em tempo real</h3>
         <p>Via WebSocket — gestor recebe alerta de envio, funcionário recebe resultado da revisão. Tudo instantâneo, sem precisar atualizar a página.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon" style="background:#EDE9FE">📊</div>
+        <div class="feature-icon" style="background:#EDE9FE" aria-hidden="true">📊</div>
         <h3>Dashboard com 5 abas</h3>
         <p>Pendentes com urgência por cor, histórico completo com filtros, ranking da equipe, gestão de modelos e análise de desempenho por item.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon" style="background:#DBEAFE">📤</div>
+        <div class="feature-icon" style="background:#DBEAFE" aria-hidden="true">📤</div>
         <h3>Exportação CSV</h3>
         <p>Exporte qualquer período filtrado por departamento, status ou funcionário para análise em planilha ou relatório gerencial.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon" style="background:#FCE7F3">🏆</div>
+        <div class="feature-icon" style="background:#FCE7F3" aria-hidden="true">🏆</div>
         <h3>Streak e ranking de equipe</h3>
         <p>Engajamento natural — funcionários veem seus dias consecutivos e o gestor acompanha quem está em dia e quem precisa de atenção.</p>
       </div>
@@ -829,7 +893,7 @@
         </div>
       </div>
 
-      <div class="flow-divider"></div>
+      <div class="flow-divider" aria-hidden="true"></div>
 
       <div class="flow-side">
         <div class="flow-side-title">
@@ -904,7 +968,7 @@
     <div class="personas-grid">
       <div class="persona-card reveal">
         <div class="persona-header emp">
-          <div class="persona-avatar">👨‍🍳</div>
+          <div class="persona-avatar" aria-hidden="true">👨‍🍳</div>
           <div class="persona-info">
             <strong>Funcionário</strong>
             <span>Operação · Linha de frente</span>
@@ -924,7 +988,7 @@
 
       <div class="persona-card reveal">
         <div class="persona-header mgr">
-          <div class="persona-avatar">👔</div>
+          <div class="persona-avatar" aria-hidden="true">👔</div>
           <div class="persona-info">
             <strong>Gestor / Administrador</strong>
             <span>Gestão · Supervisão</span>
@@ -954,22 +1018,22 @@
 
     <div class="platforms-row reveal">
       <div class="platform-item">
-        <div class="platform-icon">📱</div>
+        <div class="platform-icon" aria-hidden="true">📱</div>
         <div class="platform-name">Android</div>
         <div class="platform-note">Instala como app (PWA)</div>
       </div>
       <div class="platform-item">
-        <div class="platform-icon">🍎</div>
+        <div class="platform-icon" aria-hidden="true">🍎</div>
         <div class="platform-name">iPhone / iPad</div>
         <div class="platform-note">Safari · Adicionar à tela</div>
       </div>
       <div class="platform-item">
-        <div class="platform-icon">🖥️</div>
+        <div class="platform-icon" aria-hidden="true">🖥️</div>
         <div class="platform-name">Windows</div>
         <div class="platform-note">App nativo ou navegador</div>
       </div>
       <div class="platform-item">
-        <div class="platform-icon">🌐</div>
+        <div class="platform-icon" aria-hidden="true">🌐</div>
         <div class="platform-name">Qualquer navegador</div>
         <div class="platform-note">Chrome, Edge, Safari, Firefox</div>
       </div>
@@ -1006,19 +1070,25 @@
 
     <div class="security-grid">
       <div class="security-card reveal">
-        <div class="icon">🔒</div>
+        <div class="icon" aria-hidden="true">🔒</div>
         <h3>Autenticação JWT + bcrypt</h3>
         <p>Senhas armazenadas com hash bcrypt. Tokens com expiração configurável. Usuários desativados são bloqueados em todas as rotas imediatamente.</p>
       </div>
       <div class="security-card reveal">
-        <div class="icon">🛡️</div>
+        <div class="icon" aria-hidden="true">🛡️</div>
         <h3>Validação de uploads</h3>
         <p>Imagens validadas por magic bytes (JPEG, PNG, WebP) — não apenas pela extensão. Limite de 3 MB por arquivo. Nomes gerados por UUID.</p>
       </div>
       <div class="security-card reveal">
-        <div class="icon">🔏</div>
+        <div class="icon" aria-hidden="true">🔏</div>
         <h3>LGPD — Termos e Privacidade</h3>
-        <p>Páginas de Termos de Uso e Política de Privacidade incluídas, com base legal definida (Art. 7º, V da LGPD — execução de contrato).</p>
+        <p>
+          Páginas de
+          <button class="btn-link" onclick="openModal('modal-termos')">Termos de Uso</button>
+          e
+          <button class="btn-link" onclick="openModal('modal-privacidade')">Política de Privacidade</button>
+          com base legal definida (Art. 7º, V da LGPD — execução de contrato).
+        </p>
       </div>
     </div>
   </div>
@@ -1033,12 +1103,12 @@
       Substitua WhatsApp e planilha por um sistema que funciona. Implantação em um dia, sem treinamento técnico.
     </p>
     <div class="cta-actions">
-      <a href="mailto:flavios.silva1984@gmail.com?subject=Demo%20Pizzaria%20Check-In" class="btn btn-primary">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      <a href="mailto:flavios.silva1984@gmail.com?subject=Solicitar%20demo%20Pizzaria%20Check-In&body=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20uma%20demonstra%C3%A7%C3%A3o%20do%20Pizzaria%20Check-In." class="btn btn-primary">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
         Solicitar demo gratuita
       </a>
-      <a href="https://github.com/flavios-silva/pizzaria-checkin" class="btn btn-ghost" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+      <a href="https://github.com/flavios-silva/pizzaria-checkin" class="btn btn-ghost" target="_blank" rel="noopener noreferrer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
         Ver no GitHub
       </a>
     </div>
@@ -1049,20 +1119,81 @@
 <footer>
   <div class="container">
     <div class="footer-inner">
-      <a href="#" class="footer-logo">
-        <div class="logo-icon" style="width:28px;height:28px;font-size:14px">🍕</div>
+      <a href="#hero" class="footer-logo">
+        <div class="logo-icon" style="width:28px;height:28px;font-size:14px" aria-hidden="true">🍕</div>
         Pizzaria Check-In
       </a>
       <div class="footer-links">
         <a href="#funcionalidades">Funcionalidades</a>
         <a href="#como-funciona">Como funciona</a>
         <a href="#seguranca">Segurança</a>
+        <button class="btn-link footer-btn-link" onclick="openModal('modal-termos')">Termos de Uso</button>
+        <button class="btn-link footer-btn-link" onclick="openModal('modal-privacidade')">Privacidade</button>
         <a href="mailto:flavios.silva1984@gmail.com">Contato</a>
       </div>
       <div class="footer-copy">© 2025 · Todos os direitos reservados</div>
     </div>
   </div>
 </footer>
+
+<!-- ── Modal Termos de Uso ──────────────────────────────────────────────────── -->
+<div id="modal-termos" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-termos-title">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 id="modal-termos-title">Termos de Uso</h2>
+      <button class="modal-close" onclick="closeModal('modal-termos')" aria-label="Fechar termos de uso">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Ao utilizar o Pizzaria Check-In, você concorda com os termos descritos abaixo.</p>
+      <h3>1. Uso do sistema</h3>
+      <p>O sistema é fornecido para gerenciamento de checklists de turno em estabelecimentos de alimentação. O acesso é concedido mediante cadastro e está sujeito às permissões definidas pelo administrador do estabelecimento.</p>
+      <h3>2. Responsabilidades do usuário</h3>
+      <p>O usuário é responsável pela veracidade das informações inseridas, incluindo fotos e registros de tarefas. O uso indevido do sistema poderá resultar no bloqueio do acesso.</p>
+      <h3>3. Propriedade dos dados</h3>
+      <p>Os dados inseridos no sistema pertencem ao estabelecimento contratante. O sistema não compartilha informações com terceiros sem autorização.</p>
+      <h3>4. Disponibilidade</h3>
+      <p>O sistema é disponibilizado sem garantia de disponibilidade ininterrupta. Manutenções podem ocorrer com aviso prévio sempre que possível.</p>
+      <h3>5. Contato</h3>
+      <p>Dúvidas: <a href="mailto:flavios.silva1984@gmail.com">flavios.silva1984@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Política de Privacidade ───────────────────────────────────────── -->
+<div id="modal-privacidade" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-priv-title">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 id="modal-priv-title">Política de Privacidade</h2>
+      <button class="modal-close" onclick="closeModal('modal-privacidade')" aria-label="Fechar política de privacidade">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Esta política descreve como o Pizzaria Check-In coleta e utiliza seus dados, em conformidade com a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).</p>
+      <h3>Dados coletados</h3>
+      <p>Nome, e-mail, departamento, registros de checklists e fotos de evidência vinculadas aos turnos.</p>
+      <h3>Finalidade</h3>
+      <p>Os dados são coletados exclusivamente para a execução do contrato de gestão de turnos (Art. 7º, V da LGPD). Não há uso para fins de marketing ou repasse a terceiros.</p>
+      <h3>Armazenamento</h3>
+      <p>Os dados são armazenados em servidor seguro com acesso restrito. Fotos são nomeadas por UUID para evitar exposição de informações pessoais nas URLs.</p>
+      <h3>Seus direitos</h3>
+      <p>Você pode solicitar acesso, correção ou exclusão dos seus dados a qualquer momento pelo e-mail: <a href="mailto:flavios.silva1984@gmail.com">flavios.silva1984@gmail.com</a></p>
+      <h3>Retenção</h3>
+      <p>Os dados são mantidos enquanto a conta estiver ativa. Após desativação, os registros históricos são mantidos por até 90 dias para fins de auditoria.</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* btn-link inline para botões estilizados como link */
+  .btn-link {
+    background: none; border: none; cursor: pointer; font-family: inherit;
+    font-size: inherit; color: rgba(255,255,255,.5); text-decoration: none;
+    padding: 0;
+  }
+  .btn-link:hover { color: rgba(255,255,255,.7); }
+  .security-card .btn-link { color: rgba(255,255,255,.6); text-decoration: underline; }
+  .security-card .btn-link:hover { color: #fff; }
+  .footer-btn-link { font-size: 13px; }
+</style>
 
 <script>
   // ── Navbar scroll ──────────────────────────────────────────────────────────
@@ -1075,42 +1206,37 @@
   const reveals = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver(
     entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
-    { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    { threshold: 0.2, rootMargin: '0px' }
   );
   reveals.forEach(el => observer.observe(el));
 
-  // ── Mobile menu (simples) ─────────────────────────────────────────────────
-  function toggleMenu() {
-    const links = document.querySelector('.nav-links');
-    const cta = document.querySelector('.nav-cta');
-    if (!links) return;
-    const open = links.style.display === 'flex';
-    if (open) {
-      links.style.display = '';
-      cta.style.display = '';
-    } else {
-      links.style.display = 'flex';
-      links.style.flexDirection = 'column';
-      links.style.position = 'fixed';
-      links.style.top = '64px';
-      links.style.left = '0';
-      links.style.right = '0';
-      links.style.background = 'rgba(15,15,26,.97)';
-      links.style.padding = '20px 24px';
-      links.style.gap = '20px';
-      links.style.backdropFilter = 'blur(16px)';
+  // ── Menu mobile (via classe CSS, sem inline style) ────────────────────────
+  const hamburger = document.querySelector('.hamburger');
+  hamburger.addEventListener('click', () => {
+    const isOpen = document.body.classList.toggle('menu-open');
+    hamburger.setAttribute('aria-expanded', isOpen);
+    hamburger.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+  });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 900) {
+      document.body.classList.remove('menu-open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      hamburger.setAttribute('aria-label', 'Abrir menu');
     }
-  }
+  }, { passive: true });
 
   // ── Smooth scroll para links internos ────────────────────────────────────
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
-      const target = document.querySelector(a.getAttribute('href'));
+      const href = a.getAttribute('href');
+      if (href === '#') return;
+      const target = document.querySelector(href);
       if (target) {
         e.preventDefault();
+        document.body.classList.remove('menu-open');
+        hamburger.setAttribute('aria-expanded', 'false');
+        hamburger.setAttribute('aria-label', 'Abrir menu');
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        // fechar mobile menu se aberto
-        document.querySelector('.nav-links') && (document.querySelector('.nav-links').style.display = '');
       }
     });
   });
@@ -1124,10 +1250,21 @@
       document.querySelectorAll('.stat-value').forEach(el => {
         const raw = el.textContent.trim();
         const suffix = raw.replace(/[\d]/g, '');
-        const target = parseInt(raw) || 0;
-        if (!target) return;
+        const target = parseInt(raw);
+
+        // percentuais usam fade-in para evitar confusão visual
+        if (suffix === '%') {
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.8s ease';
+          setTimeout(() => { el.style.opacity = '1'; }, 100);
+          return;
+        }
+
+        if (!target && target !== 0) return;
+        if (target === 0) return; // já exibe zero, sem animação
+
         let current = 0;
-        const step = Math.ceil(target / 40);
+        const step = Math.max(1, Math.ceil(target / 40));
         const timer = setInterval(() => {
           current = Math.min(current + step, target);
           el.textContent = current + suffix;
@@ -1136,6 +1273,29 @@
       });
     }
   }, { threshold: 0.5 }).observe(statsSection);
+
+  // ── Modais Termos / Privacidade ───────────────────────────────────────────
+  function openModal(id) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    modal.querySelector('.modal-close').focus();
+  }
+  function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', e => {
+      if (e.target === modal) closeModal(modal.id);
+    });
+    modal.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal(modal.id);
+    });
+  });
 </script>
 </body>
 </html>
