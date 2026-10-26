@@ -2,9 +2,13 @@
 
 Sistema de checklists diários para a operação de uma pizzaria. Os funcionários preenchem os checklists de **entrada** e **fechamento** do seu setor (com foto quando necessário) e o gerente revisa, aprova ou rejeita cada um, recebendo notificações em tempo real.
 
-![Tela de login](screenshots/pagina_inicia_do_app.png) (screenshots/painel_gestor.png) (screenshots/painel_gestor_2.png) (screenshots/painel_gestor_3.png) (screenshots/painel_gestor_4.png) (screenshots/painel_gestor_5.png) (screenshots/painel_gestor_6.png)
-
-
+![Tela de login](screenshots/pagina_inicia_do_app.png)
+![Tela de gestor](screenshots/painel_gestor.png)
+![Tela de gestor2](screenshots/painel_gestor_2.png)
+![Tela de gestor3](screenshots/painel_gestor_3.png)
+![Tela de gestor4](screenshots/painel_gestor_4.png) 
+![Tela de gestor5](screenshots/painel_gestor_5.png)
+![Tela de gestor6](screenshots/painel_gestor_6.png)
 
 
 
