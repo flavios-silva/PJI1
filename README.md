@@ -21,6 +21,23 @@ Sistema de checklists diários para a operação de uma pizzaria. Os funcionári
 - Fluxo de revisão: o gerente aprova ou rejeita os checklists enviados
 - Notificações em tempo real via WebSocket
 - Cadastro de funcionários e gestão dos modelos de checklist pelo gerente
+- Acessibilidade digital: leitor de tela, Libras (VLibras), teclado, alto contraste e tamanho de texto (veja a seção abaixo)
+
+## Acessibilidade
+
+O app segue a **WCAG 2.2 nível AA** (e AAA no modo de alto contraste) e a Lei Brasileira de Inclusão. Em qualquer tela, o botão de acessibilidade (ícone de pessoa, canto superior direito) ou o atalho **Alt + A** abre o painel.
+
+| Recurso | Como funciona | Onde está |
+|---|---|---|
+| **Leitores de tela** | Botões com nome (`tooltip`), fotos com descrição (`semantics_label`), títulos marcados, erros anunciados sozinhos, idioma `pt-BR`. A árvore de acessibilidade do Flutter é ligada na abertura. | `frontend/assets/index.html`, `app/a11y.py`, páginas |
+| **Libras** | Widget **VLibras** (governo federal) no app web e na página de apresentação. Precisa de internet. O app não tem vídeos; se tiver, devem ter legenda. | `frontend/assets/index.html`, `index.html` |
+| **Só teclado** | `Tab`/`Shift+Tab`, `Enter`/`Espaço`, `Esc` fecha janelas, foco visível. Atalhos: `Alt+A` painel, `Alt+C` contraste, `Alt++`/`Alt+-` tamanho, `Alt+0` normal. | `app/a11y.py` |
+| **Contraste e letras** | Todas as cores com contraste ≥ 4,5:1 (normal) e ≥ 7:1 (alto contraste), conferido por cálculo. Texto de 100% a 150%. Texto mínimo de 12. Status nunca só por cor. Orientação livre (retrato e paisagem). | `app/theme.py`, `app/a11y.py` |
+| **Linguagem simples** | Frases curtas, erros dizem o que fazer. Declaração em `/acessibilidade`. | `app/pages/accessibility_page.py` |
+
+As escolhas de texto e contraste ficam salvas **por pessoa e por aparelho** (`SharedPreferences`).
+
+**Limitações conhecidas:** a escala de texto atua em textos e ícones; rótulos internos de botões e campos seguem o zoom do navegador (`Ctrl` + `+`), que continua liberado. O VLibras pode errar termos técnicos. Teste manual com NVDA/JAWS (Chrome ou Edge) e TalkBack é recomendado antes de cada entrega.
 
 ## Tecnologias
 

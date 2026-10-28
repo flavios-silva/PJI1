@@ -336,7 +336,7 @@ def build_employee_view(page: ft.Page, state: AppState) -> ft.View:
                     content=ft.Column(
                         [
                             ft.Text(str(value), size=18, weight=ft.FontWeight.BOLD, color=color),
-                            ft.Text(label, size=10, color=th.ON_SURFACE_VARIANT, text_align=ft.TextAlign.CENTER),
+                            ft.Text(label, size=12, color=th.ON_SURFACE_VARIANT, text_align=ft.TextAlign.CENTER),
                         ],
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         spacing=2,
@@ -354,12 +354,12 @@ def build_employee_view(page: ft.Page, state: AppState) -> ft.View:
                         [
                             ft.Row(
                                 [ft.Icon(ft.Icons.WB_SUNNY_OUTLINED, size=11, color=th.PRIMARY),
-                                 ft.Text(f"Abertura: {entrada_count}", size=11, color=th.PRIMARY)],
+                                 ft.Text(f"Abertura: {entrada_count}", size=12, color=th.PRIMARY)],
                                 spacing=4,
                             ),
                             ft.Row(
                                 [ft.Icon(ft.Icons.NIGHTS_STAY_OUTLINED, size=11, color=th.SECONDARY),
-                                 ft.Text(f"Fechamento: {fechamento_count}", size=11, color=th.SECONDARY)],
+                                 ft.Text(f"Fechamento: {fechamento_count}", size=12, color=th.SECONDARY)],
                                 spacing=4,
                             ),
                         ],
@@ -372,7 +372,7 @@ def build_employee_view(page: ft.Page, state: AppState) -> ft.View:
                     padding=ft.Padding.symmetric(horizontal=12, vertical=8),
                     content=ft.Column(
                         [
-                            ft.Text(period_label, size=11, color=th.ON_SURFACE_VARIANT),
+                            ft.Text(period_label, size=12, color=th.ON_SURFACE_VARIANT),
                             ft.Row(
                                 [
                                     _mini_stat("Total", len(filtered), th.PRIMARY),
@@ -560,7 +560,7 @@ def build_employee_view(page: ft.Page, state: AppState) -> ft.View:
         if url:
             return ft.Container(
                 width=32, height=32, border_radius=16,
-                content=ft.Image(src=f"{state.media_base}{url}", fit=ft.ImageFit.COVER),
+                content=ft.Image(src=f"{state.media_base}{url}", fit=ft.BoxFit.COVER, exclude_from_semantics=True),
                 clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
             )
         initial = state.display_name[:1].upper() if state.display_name else "?"
@@ -752,7 +752,7 @@ def _build_template_card(page, state, api, tmpl: dict, existing: dict | None) ->
                                 spacing=2, expand=True,
                             ),
                             ft.Container(
-                                content=ft.Text(f"{total_items} itens", size=11, color=th.ON_SURFACE_VARIANT),
+                                content=ft.Text(f"{total_items} itens", size=12, color=th.ON_SURFACE_VARIANT),
                                 bgcolor=th.SURFACE_VARIANT, border_radius=8,
                                 padding=ft.Padding.symmetric(horizontal=8, vertical=4),
                             ),
@@ -809,7 +809,7 @@ def _build_history_card(page, c: dict) -> ft.Container:
             ft.Column(
                 [
                     th.status_chip(status),
-                    ft.IconButton(ft.Icons.CHEVRON_RIGHT, icon_color=th.ON_SURFACE_VARIANT, on_click=go_detail),
+                    ft.IconButton(ft.Icons.CHEVRON_RIGHT, icon_color=th.ON_SURFACE_VARIANT, tooltip="Abrir checklist", on_click=go_detail),
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.END,

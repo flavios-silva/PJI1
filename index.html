@@ -11,6 +11,21 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://flavios-silva.github.io/PJI1/" />
   <meta name="twitter:card" content="summary" />
+  <script>
+    /* aplica preferências de acessibilidade antes da pintura (evita "piscar") */
+    (function () {
+      var d = document.documentElement, p = {};
+      d.classList.add("js");
+      try { p = JSON.parse(localStorage.getItem("pizzaria-a11y")) || {}; } catch (e) {}
+      try {
+        if ([100,110,125,150].indexOf(p.fs) > -1) d.style.setProperty("--fs", p.fs / 100);
+        var hc = typeof p.hc === "boolean" ? p.hc : matchMedia("(prefers-contrast: more)").matches;
+        var rm = typeof p.rm === "boolean" ? p.rm : matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (hc) d.classList.add("hc");
+        if (rm) d.classList.add("rm");
+      } catch (e) {}
+    })();
+  </script>
   <link rel="canonical" href="https://flavios-silva.github.io/PJI1/" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,18 +34,23 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --red:        #E53935;
-      --red-dark:   #B71C1C;
+      --red:        #C62828;
+      --red-dark:   #9B1B1B;
+      --red-on-dark: #FF8A80;
+      --on-dark:    #FFFFFF;
+      --on-dark-2:  #CBD0DC;
+      --focus:      #C62828;
+      --fs:         1;
       --red-light:  #FFEBEE;
-      --amber:      #FF8F00;
-      --green:      #2E7D32;
+      --amber:      #FFA726;
+      --green:      #1B5E20;
       --dark:       #0F0F1A;
       --dark-2:     #1A1A2E;
       --dark-3:     #252540;
       --surface:    #FFFFFF;
       --surface-2:  #F8F9FA;
       --text:       #1A1A2E;
-      --text-muted: #6B7280;
+      --text-muted: #4B5563;
       --border:     #E5E7EB;
       --radius:     14px;
       --radius-lg:  20px;
@@ -39,44 +59,45 @@
       --shadow-lg:  0 20px 60px rgba(0,0,0,.14);
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; font-size: calc(100% * var(--fs)); scroll-padding-top: 88px; scroll-padding-bottom: 88px; -webkit-text-size-adjust: 100%; }
 
     body {
       font-family: 'Inter', system-ui, sans-serif;
       color: var(--text);
       background: var(--surface);
-      overflow-x: hidden;
+      overflow-x: hidden; overflow-wrap: break-word;
     }
 
     /* ── Foco acessível ──────────────────────────────── */
-    a:focus-visible, button:focus-visible {
-      outline: 2px solid var(--red);
-      outline-offset: 3px;
-      border-radius: 4px;
-    }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+    #navbar:not(.scrolled), #hero, #como-funciona, #stats, #cta, footer, .solution-side, .security-card, .persona-header, .nav-links { --focus: #FFD54F; }
+    #navbar.scrolled { --focus: #C62828; }
+    body.menu-open .nav-links { --focus: #FFD54F; }
+    [tabindex="-1"]:focus { outline: none; }
 
     /* ── Utilitários ─────────────────────────────── */
     .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
     .tag {
       display: inline-flex; align-items: center; gap: 6px;
-      font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
       color: var(--red); background: var(--red-light);
       padding: 5px 12px; border-radius: 100px;
     }
-    .tag::before { content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
+    .tag::before { content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .tag-dark { background: rgba(229,57,53,.2); color: var(--red-on-dark); }
     .section-label { text-align: center; margin-bottom: 16px; }
     h2.section-title {
-      font-size: clamp(28px, 4vw, 40px); font-weight: 800;
+      font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 800;
       text-align: center; line-height: 1.2; margin-bottom: 16px;
     }
     .section-sub {
-      font-size: 17px; color: var(--text-muted); text-align: center;
+      font-size: 1.0625rem; color: var(--text-muted); text-align: center;
       max-width: 580px; margin: 0 auto 56px; line-height: 1.6;
     }
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      font-family: inherit; font-size: 15px; font-weight: 600;
-      padding: 14px 28px; border-radius: 100px; border: none; cursor: pointer;
+      font-family: inherit; font-size: 0.9375rem; font-weight: 600;
+      padding: 14px 28px; min-height: 44px; border-radius: 100px; border: none; cursor: pointer;
       text-decoration: none; transition: all .2s ease;
     }
     .btn-primary {
@@ -113,38 +134,37 @@
     }
     .nav-logo {
       display: flex; align-items: center; gap: 10px;
-      font-size: 18px; font-weight: 800; color: #fff;
+      font-size: 1.125rem; font-weight: 800; color: #fff;
       text-decoration: none; transition: color .3s;
     }
     nav.scrolled .nav-logo { color: var(--text); }
     .logo-icon {
       width: 36px; height: 36px; border-radius: 10px;
       background: var(--red); display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
+      font-size: 1.125rem;
     }
     .nav-links {
       display: flex; align-items: center; gap: 32px; list-style: none;
     }
     .nav-links a {
-      font-size: 14px; font-weight: 500;
-      color: rgba(255,255,255,.8); text-decoration: none; transition: color .3s;
+      display: inline-flex; align-items: center; min-height: 44px;
+      font-size: 0.875rem; font-weight: 500;
+      color: var(--on-dark-2); text-decoration: none; transition: color .3s;
     }
     nav.scrolled .nav-links a { color: var(--text-muted); }
-    .nav-links a:hover { color: #fff; }
-    nav.scrolled .nav-links a:hover { color: var(--red); }
+    .nav-links a:hover { color: #fff; text-decoration: underline; }
+    nav.scrolled .nav-links a:hover { color: var(--red); text-decoration: underline; }
     .nav-cta { display: flex; align-items: center; gap: 12px; }
-    .nav-cta .btn { padding: 10px 22px; font-size: 14px; }
+    .nav-cta .btn { padding: 10px 22px; font-size: 0.875rem; }
 
     /* hamburger como <button> */
     .hamburger {
       display: none; flex-direction: column; gap: 5px;
-      cursor: pointer; padding: 4px;
+      cursor: pointer; padding: 4px; min-width: 44px; min-height: 44px; align-items: center; justify-content: center;
       background: none; border: none; -webkit-appearance: none;
       border-radius: 4px;
     }
-    .hamburger:focus-visible { outline: 2px solid rgba(255,255,255,.5); outline-offset: 2px; }
-    nav.scrolled .hamburger:focus-visible { outline-color: var(--red); }
-    .hamburger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all .3s; }
+        .hamburger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all .3s; }
     nav.scrolled .hamburger span { background: var(--text); }
 
     /* ── Hero ────────────────────────────────────── */
@@ -169,19 +189,19 @@
     }
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 8px;
-      font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
       color: var(--amber); margin-bottom: 20px;
     }
     .hero-eyebrow::before {
       content: ''; display: block; width: 20px; height: 2px; background: var(--amber);
     }
     h1 {
-      font-size: clamp(36px, 5vw, 56px); font-weight: 900; line-height: 1.1;
+      font-size: clamp(2.25rem, 5vw, 3.5rem); font-weight: 900; line-height: 1.1;
       color: #fff; margin-bottom: 20px;
     }
-    h1 span { color: var(--red); }
+    h1 span { color: var(--red-on-dark); }
     .hero-sub {
-      font-size: 17px; line-height: 1.7; color: rgba(255,255,255,.65);
+      font-size: 1.0625rem; line-height: 1.7; color: var(--on-dark-2);
       margin-bottom: 36px; max-width: 480px;
     }
     .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
@@ -191,7 +211,7 @@
     }
     .hero-badge {
       display: flex; align-items: center; gap: 8px;
-      font-size: 13px; font-weight: 500; color: rgba(255,255,255,.6);
+      font-size: 0.8125rem; font-weight: 500; color: var(--on-dark-2);
     }
     .hero-badge svg { opacity: .7; }
 
@@ -230,7 +250,7 @@
     }
     .phone-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .phone-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .phone-card-title { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.8); }
+    .phone-card-title { font-size: 11px; font-weight: 600; color: #F3F4F6; }
     .phone-progress-bar {
       height: 4px; background: rgba(255,255,255,.08); border-radius: 2px; margin-bottom: 8px;
     }
@@ -245,8 +265,8 @@
       border: 1.5px solid rgba(255,255,255,.2);
     }
     .phone-check.done { background: var(--red); border-color: var(--red); }
-    .phone-item-text { font-size: 10px; color: rgba(255,255,255,.6); }
-    .phone-item-text.done { color: rgba(255,255,255,.3); text-decoration: line-through; }
+    .phone-item-text { font-size: 10px; color: #E5E7EB; }
+    .phone-item-text.done { color: #A5ACC0; text-decoration: line-through; }
 
     .desktop-frame {
       position: absolute; right: -30px; bottom: -20px;
@@ -268,7 +288,7 @@
       border: 1px solid rgba(255,255,255,.06); text-align: center;
     }
     .desktop-stat-value { font-size: 18px; font-weight: 800; color: #fff; }
-    .desktop-stat-label { font-size: 9px; color: rgba(255,255,255,.4); margin-top: 2px; }
+    .desktop-stat-label { font-size: 9px; color: #B8BED0; margin-top: 2px; }
     .desktop-chart { grid-column: 1 / -1; height: 60px; position: relative; }
     .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 100%; }
     .chart-bar {
@@ -292,7 +312,7 @@
     }
     .notif-text { font-size: 11px; }
     .notif-title { font-weight: 700; color: #fff; }
-    .notif-body { color: rgba(255,255,255,.5); }
+    .notif-body { color: #B8BED0; }
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50%       { transform: translateY(-6px); }
@@ -306,19 +326,19 @@
     .problem-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
     }
-    .problem-side h2 { text-align: left; font-size: clamp(26px, 3.5vw, 36px); margin-bottom: 20px; }
-    .problem-side p { font-size: 16px; line-height: 1.7; color: var(--text-muted); margin-bottom: 28px; }
+    .problem-side h2 { text-align: left; font-size: clamp(1.625rem, 3.5vw, 2.25rem); margin-bottom: 20px; }
+    .problem-side p { font-size: 1rem; line-height: 1.7; color: var(--text-muted); margin-bottom: 28px; }
     .pain-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
     .pain-item {
       display: flex; align-items: flex-start; gap: 12px;
-      font-size: 15px; line-height: 1.5; color: var(--text);
+      font-size: 0.9375rem; line-height: 1.5; color: var(--text);
     }
     .pain-icon {
       width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0; margin-top: 1px;
-      display: flex; align-items: center; justify-content: center; font-size: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 0.75rem;
     }
-    .pain-icon.bad  { background: #FEE2E2; color: #DC2626; }
-    .pain-icon.good { background: #DCFCE7; color: #16A34A; }
+    .pain-icon.bad  { background: #FEE2E2; color: #B91C1C; }
+    .pain-icon.good { background: #DCFCE7; color: #166534; }
 
     .solution-side {
       background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
@@ -331,17 +351,17 @@
       width: 200px; height: 200px; border-radius: 50%;
       background: rgba(229,57,53,.15);
     }
-    .solution-side h3 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
-    .solution-side p { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,.6); margin-bottom: 24px; }
+    .solution-side h3 { font-size: 1.375rem; font-weight: 800; margin-bottom: 10px; }
+    .solution-side p { font-size: 0.875rem; line-height: 1.6; color: var(--on-dark-2); margin-bottom: 24px; }
     .solution-steps { display: flex; flex-direction: column; gap: 16px; }
     .solution-step { display: flex; align-items: flex-start; gap: 14px; }
     .step-number {
       width: 28px; height: 28px; border-radius: 8px;
-      background: var(--red); color: #fff; font-size: 13px; font-weight: 800;
+      background: var(--red); color: #fff; font-size: 0.8125rem; font-weight: 800;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .step-content strong { display: block; font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 2px; }
-    .step-content span { font-size: 13px; color: rgba(255,255,255,.5); }
+    .step-content strong { display: block; font-size: 0.875rem; font-weight: 600; color: #fff; margin-bottom: 2px; }
+    .step-content span { font-size: 0.8125rem; color: var(--on-dark-2); }
 
     /* ── Funcionalidades ─────────────────────────── */
     #funcionalidades { padding: 100px 0; }
@@ -361,10 +381,10 @@
     .feature-icon {
       width: 48px; height: 48px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 24px; margin-bottom: 16px;
+      font-size: 1.5rem; margin-bottom: 16px;
     }
-    .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
-    .feature-card p { font-size: 14px; line-height: 1.65; color: var(--text-muted); }
+    .feature-card h3 { font-size: 1.0625rem; font-weight: 700; margin-bottom: 10px; }
+    .feature-card p { font-size: 0.875rem; line-height: 1.65; color: var(--text-muted); }
 
     /* ── Como funciona ───────────────────────────── */
     #como-funciona {
@@ -373,7 +393,7 @@
       color: #fff;
     }
     #como-funciona h2 { color: #fff; }
-    #como-funciona .section-sub { color: rgba(255,255,255,.6); }
+    #como-funciona .section-sub { color: var(--on-dark-2); }
 
     .flow-grid {
       display: grid; grid-template-columns: repeat(2, 1fr);
@@ -382,13 +402,13 @@
     .flow-side { padding: 20px 0; }
     .flow-side-title {
       display: flex; align-items: center; gap: 12px;
-      font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+      font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
       margin-bottom: 32px;
     }
     .flow-pill {
-      font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 100px;
+      font-size: 0.6875rem; font-weight: 700; padding: 4px 12px; border-radius: 100px;
     }
-    .pill-emp  { background: rgba(229,57,53,.2); color: #FF7070; }
+    .pill-emp  { background: rgba(229,57,53,.2); color: var(--red-on-dark); }
     .pill-mgr  { background: rgba(255,143,0,.2); color: var(--amber); }
 
     .flow-steps { display: flex; flex-direction: column; gap: 0; }
@@ -400,12 +420,12 @@
     .flow-step-num {
       width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 800;
+      font-size: 0.875rem; font-weight: 800;
     }
-    .num-emp { background: rgba(229,57,53,.2); color: #FF7070; }
+    .num-emp { background: rgba(229,57,53,.2); color: var(--red-on-dark); }
     .num-mgr { background: rgba(255,143,0,.2); color: var(--amber); }
-    .flow-step-body strong { display: block; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-    .flow-step-body span { font-size: 13px; color: rgba(255,255,255,.5); line-height: 1.5; }
+    .flow-step-body strong { display: block; font-size: 0.9375rem; font-weight: 700; margin-bottom: 4px; }
+    .flow-step-body span { font-size: 0.8125rem; color: var(--on-dark-2); line-height: 1.5; }
 
     .flow-divider {
       width: 1px; background: rgba(255,255,255,.08);
@@ -422,8 +442,8 @@
       border-right: 1px solid rgba(255,255,255,.2);
     }
     .stat-item:last-child { border-right: none; }
-    .stat-value { font-size: clamp(36px, 5vw, 52px); font-weight: 900; color: #fff; line-height: 1; }
-    .stat-label { font-size: 14px; color: rgba(255,255,255,.75); margin-top: 8px; font-weight: 500; }
+    .stat-value { font-size: clamp(2.25rem, 5vw, 3.25rem); font-weight: 900; color: #fff; line-height: 1; }
+    .stat-label { font-size: 0.875rem; color: var(--on-dark); margin-top: 8px; font-weight: 500; }
 
     /* ── Para quem é ─────────────────────────────── */
     #para-quem { padding: 100px 0; background: var(--surface-2); }
@@ -441,17 +461,17 @@
     .persona-avatar {
       width: 52px; height: 52px; border-radius: 14px;
       background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center;
-      font-size: 26px;
+      font-size: 1.625rem;
     }
-    .persona-info strong { display: block; font-size: 18px; font-weight: 800; color: #fff; }
-    .persona-info span { font-size: 13px; color: rgba(255,255,255,.5); }
+    .persona-info strong, .persona-info h3 { display: block; font-size: 1.125rem; font-weight: 800; color: #fff; }
+    .persona-info span { font-size: 0.8125rem; color: var(--on-dark-2); }
     .persona-body { background: #fff; padding: 28px 32px; }
     .persona-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
     .persona-list li {
       display: flex; align-items: flex-start; gap: 10px;
-      font-size: 14px; line-height: 1.5; color: var(--text);
+      font-size: 0.875rem; line-height: 1.5; color: var(--text);
     }
-    .persona-list li::before { content: '✓'; color: var(--green); font-weight: 800; flex-shrink: 0; margin-top: 0px; }
+    .persona-list li::before { content: '✓' / ''; color: var(--green); font-weight: 800; flex-shrink: 0; margin-top: 0px; }
 
     /* ── Plataformas ─────────────────────────────── */
     #plataformas { padding: 80px 0; }
@@ -465,9 +485,9 @@
       transition: all .2s;
     }
     .platform-item:hover { border-color: var(--red); box-shadow: 0 4px 20px rgba(229,57,53,.1); }
-    .platform-icon { font-size: 32px; }
-    .platform-name { font-size: 14px; font-weight: 700; }
-    .platform-note { font-size: 11px; color: var(--text-muted); }
+    .platform-icon { font-size: 2rem; }
+    .platform-name { font-size: 0.875rem; font-weight: 700; }
+    .platform-note { font-size: 0.75rem; color: var(--text-muted); }
 
     /* ── Stack técnica ───────────────────────────── */
     #stack { padding: 80px 0; background: var(--surface-2); }
@@ -477,11 +497,11 @@
     .stack-badge {
       display: flex; align-items: center; gap: 8px;
       background: var(--surface); border: 1.5px solid var(--border);
-      padding: 10px 18px; border-radius: 100px; font-size: 14px; font-weight: 600;
+      padding: 10px 18px; border-radius: 100px; font-size: 0.875rem; font-weight: 600;
     }
     .stack-badge img { width: 18px; height: 18px; }
     .stack-note {
-      text-align: center; margin-top: 24px; font-size: 13px; color: var(--text-muted);
+      text-align: center; margin-top: 24px; font-size: 0.8125rem; color: var(--text-muted);
     }
 
     /* ── Segurança ───────────────────────────────── */
@@ -493,9 +513,9 @@
       background: var(--dark); border-radius: var(--radius-lg); padding: 28px;
       border: 1px solid rgba(255,255,255,.06);
     }
-    .security-card .icon { font-size: 28px; margin-bottom: 14px; }
-    .security-card h3 { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-    .security-card p { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,.5); }
+    .security-card .icon { font-size: 1.75rem; margin-bottom: 14px; }
+    .security-card h3 { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .security-card p { font-size: 0.8125rem; line-height: 1.6; color: var(--on-dark-2); }
 
     /* ── CTA ─────────────────────────────────────── */
     #cta {
@@ -509,13 +529,13 @@
       width: 600px; height: 600px; border-radius: 50%;
       background: radial-gradient(ellipse, rgba(229,57,53,.15) 0%, transparent 70%);
     }
-    #cta h2 { color: #fff; font-size: clamp(32px, 5vw, 52px); margin-bottom: 16px; }
-    #cta p { color: rgba(255,255,255,.6); font-size: 17px; margin-bottom: 40px; max-width: 500px; margin-left: auto; margin-right: auto; }
+    #cta h2 { color: #fff; font-size: clamp(2rem, 5vw, 3.25rem); margin-bottom: 16px; }
+    #cta p { color: var(--on-dark-2); font-size: 1.0625rem; margin-bottom: 40px; max-width: 500px; margin-left: auto; margin-right: auto; }
     .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 
     /* ── Footer ──────────────────────────────────── */
     footer {
-      background: #0A0A12; color: rgba(255,255,255,.4);
+      background: #0A0A12; color: var(--on-dark-2);
       padding: 48px 0;
     }
     .footer-inner {
@@ -523,20 +543,22 @@
     }
     .footer-logo {
       display: flex; align-items: center; gap: 10px;
-      font-size: 16px; font-weight: 800; color: rgba(255,255,255,.7);
+      font-size: 1rem; font-weight: 800; color: var(--on-dark-2);
       text-decoration: none;
     }
-    .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
-    .footer-links a { font-size: 13px; color: rgba(255,255,255,.4); text-decoration: none; }
-    .footer-links a:hover { color: rgba(255,255,255,.7); }
-    .footer-copy { font-size: 13px; }
+    .footer-links { display: flex; gap: 8px 24px; flex-wrap: wrap; align-items: center; }
+    .footer-links a, .footer-btn-link { display: inline-flex; align-items: center; min-height: 44px; }
+    .footer-links a { font-size: 0.8125rem; color: var(--on-dark-2); text-decoration: underline; }
+    .footer-links a:hover, .footer-links .btn-link:hover { color: var(--on-dark); }
+    .footer-url { color: var(--on-dark-2); font-size: 0.75rem; font-family: monospace; display: inline-flex; align-items: center; min-height: 24px; }
+    .footer-copy { font-size: 0.8125rem; }
 
     /* ── Animações de entrada ────────────────────── */
-    .reveal {
+    html.js .reveal {
       opacity: 0; transform: translateY(24px);
       transition: opacity .6s ease, transform .6s ease;
     }
-    .reveal.visible { opacity: 1; transform: none; }
+    html.js .reveal.visible { opacity: 1; transform: none; }
 
     /* ── Modal ───────────────────────────────────── */
     .modal-overlay {
@@ -553,22 +575,125 @@
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 24px;
     }
-    .modal-header h2 { font-size: 22px; font-weight: 800; }
+    .modal-header h2 { font-size: 1.375rem; font-weight: 800; }
     .modal-close {
       background: none; border: none; cursor: pointer;
-      font-size: 28px; line-height: 1; color: var(--text-muted);
-      padding: 4px 8px; border-radius: 6px;
+      font-size: 1.75rem; line-height: 1; color: var(--text-muted);
+      padding: 4px 8px; border-radius: 6px; min-width: 44px; min-height: 44px;
     }
     .modal-close:hover { background: var(--surface-2); }
-    .modal-body { font-size: 14px; line-height: 1.8; color: var(--text-muted); }
-    .modal-body h3 { font-size: 15px; font-weight: 700; color: var(--text); margin: 20px 0 8px; }
+    .modal-body { font-size: 0.875rem; line-height: 1.8; color: var(--text-muted); }
+    .modal-body h3 { font-size: 0.9375rem; font-weight: 700; color: var(--text); margin: 20px 0 8px; }
     .modal-body p { margin-bottom: 12px; }
+    .modal-body ul { margin: 0 0 12px 22px; }
+    .modal-body li { margin-bottom: 4px; }
+    .modal-body kbd { font-family: inherit; font-weight: 700; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; padding: 0 6px; background: var(--surface-2); color: var(--text); }
+    .modal-body a { color: var(--red); }
+
+
+    /* ════════ ACESSIBILIDADE ════════════════════════════════════════════ */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+    .skip-link {
+      position: fixed; top: 8px; left: 8px; z-index: 400;
+      background: #fff; color: #111; font-weight: 700; font-size: 1rem;
+      padding: 12px 20px; border-radius: 8px; border: 3px solid #C62828;
+      text-decoration: none; transform: translateY(-300%);
+    }
+    .skip-link:focus { transform: none; }
+
+    /* botões em forma de link (rodapé, segurança, painel) */
+    .btn-link {
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      font-size: inherit; color: var(--on-dark-2); text-decoration: underline; padding: 0;
+    }
+    .btn-link:hover { color: var(--on-dark); }
+    .security-card .btn-link { color: var(--on-dark); }
+    .footer-btn-link { font-size: 0.8125rem; }
+
+    /* painel de acessibilidade */
+    .a11y-widget { position: fixed; left: 16px; bottom: 16px; z-index: 150; }
+    .a11y-toggle {
+      display: inline-flex; align-items: center; gap: 8px; min-height: 48px;
+      padding: 10px 18px; border-radius: 100px; cursor: pointer;
+      font-family: inherit; font-size: 0.9375rem; font-weight: 700;
+      background: #1A1A2E; color: #fff; border: 2px solid #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,.35);
+      --focus: #FFD54F;
+    }
+    .a11y-toggle:focus-visible { outline: 3px solid #FFD54F; outline-offset: 3px; box-shadow: 0 0 0 3px #000; }
+    .a11y-toggle:hover { background: #000; }
+    .a11y-panel {
+      position: absolute; left: 0; bottom: 60px;
+      width: min(340px, calc(100vw - 32px)); max-height: calc(100vh - 100px); overflow-y: auto;
+      background: #fff; color: var(--text); border: 2px solid #1A1A2E; border-radius: 16px;
+      padding: 20px; box-shadow: var(--shadow-lg);
+    }
+    .a11y-panel[hidden] { display: none; }
+    .a11y-panel h2 { font-size: 1.125rem; font-weight: 800; margin-bottom: 14px; text-align: left; }
+    .a11y-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .a11y-label { font-size: 0.9375rem; font-weight: 600; }
+    .a11y-btns { display: flex; gap: 6px; }
+    .a11y-btn, .a11y-switch, .a11y-reset {
+      font-family: inherit; font-size: 0.9375rem; font-weight: 700; cursor: pointer;
+      min-height: 44px; min-width: 44px; padding: 8px 12px; border-radius: 10px;
+      background: #fff; color: #1A1A2E; border: 2px solid #1A1A2E;
+    }
+    .a11y-btn:hover, .a11y-switch:hover, .a11y-reset:hover { background: var(--surface-2); }
+    .a11y-out { font-size: 0.875rem; color: var(--text-muted); width: 100%; }
+    .a11y-switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; margin-bottom: 10px; text-align: left; }
+    .a11y-switch .state { font-size: 0.8125rem; padding: 2px 10px; border-radius: 100px; background: #E5E7EB; color: #111; }
+    .a11y-switch[aria-checked="true"] { background: #1A1A2E; color: #fff; }
+    .a11y-switch[aria-checked="true"] .state { background: #fff; color: #1A1A2E; }
+    .a11y-reset { width: 100%; margin-bottom: 10px; }
+    .a11y-panel .btn-link { color: var(--red); display: inline-flex; align-items: center; min-height: 44px; font-size: 0.9375rem; }
+    .a11y-hint { font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* ── Alto contraste ─────────────────────────────── */
+    html.hc {
+      --red: #7A0000; --red-dark: #4D0000; --red-light: #fff; --red-on-dark: #FFE14D;
+      --amber: #FFE14D; --green: #004D1A;
+      --dark: #000; --dark-2: #000; --dark-3: #000;
+      --surface: #fff; --surface-2: #fff; --text: #000; --text-muted: #000; --border: #000;
+      --on-dark: #fff; --on-dark-2: #fff; --focus: #0000CC;
+    }
+    html.hc *, html.hc *::before, html.hc *::after { box-shadow: none !important; text-shadow: none !important; backdrop-filter: none !important; }
+    html.hc #hero, html.hc #como-funciona, html.hc #cta, html.hc .solution-side,
+    html.hc .persona-header, html.hc footer, html.hc .security-card, html.hc .phone-screen { background: #000 !important; }
+    html.hc #hero::before, html.hc #cta::before, html.hc .solution-side::before { display: none; }
+    html.hc nav.scrolled { background: #fff; border-bottom: 2px solid #000; }
+    html.hc .nav-links a { color: #fff; }
+    html.hc nav.scrolled .nav-links a, html.hc nav.scrolled .nav-logo { color: #000; }
+    html.hc a:not(.btn):not(.nav-logo):not(.footer-logo) { text-decoration: underline; }
+    html.hc .btn-ghost { background: #000; border: 2px solid #fff; color: #fff; }
+    html.hc .btn-primary { background: #7A0000; border: 2px solid #fff; }
+    html.hc .feature-card, html.hc .platform-item, html.hc .stack-badge, html.hc .persona-card { border: 2px solid #000; }
+    html.hc .security-card, html.hc .phone-frame, html.hc .desktop-frame, html.hc .floating-notif { border: 2px solid #fff; }
+    html.hc .tag { background: #fff; border: 2px solid #7A0000; color: #7A0000; }
+    html.hc .tag-dark, html.hc .flow-pill, html.hc .flow-step-num { background: #000; border: 2px solid #FFE14D; color: #FFE14D; }
+    html.hc .step-number { background: #fff; color: #000; }
+    html.hc :focus-visible { outline-width: 4px; }
+    html.hc #navbar:not(.scrolled), html.hc #hero, html.hc #como-funciona, html.hc #stats, html.hc #cta,
+    html.hc footer, html.hc .solution-side, html.hc .security-card, html.hc .persona-header, html.hc .nav-links { --focus: #FFE14D; }
+
+    /* ── Menos movimento ─────────────────────────────── */
+    html.rm *, html.rm *::before, html.rm *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    html.rm .reveal { opacity: 1 !important; transform: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+      html *, html *::before, html *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+      html .reveal { opacity: 1 !important; transform: none !important; }
+    }
+    @media (forced-colors: active) {
+      .a11y-toggle, .a11y-btn, .a11y-switch { border: 2px solid ButtonText; }
+    }
 
     /* ── Responsividade ──────────────────────────── */
     @media (max-width: 900px) {
       .hero-grid, .problem-grid, .flow-grid, .personas-grid { grid-template-columns: 1fr; }
       .features-grid, .security-grid { grid-template-columns: 1fr 1fr; }
-      .stats-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
       .stat-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,.2); padding: 20px; }
       .stat-item:nth-child(2n) { border-right: none; }
       .stat-item:nth-child(3), .stat-item:nth-child(4) { border-bottom: none; }
@@ -583,36 +708,44 @@
         flex-direction: column;
         position: fixed;
         top: 70px; left: 0; right: 0;
-        background: rgba(15,15,26,.97);
-        backdrop-filter: blur(16px);
+        background: #0F0F1A;
         padding: 24px; gap: 20px;
         z-index: 99;
         list-style: none;
       }
+      .nav-links a, nav.scrolled .nav-links a { color: var(--on-dark); }
       body.menu-open .nav-links { display: flex; }
       body.menu-open { overflow: hidden; }
+      html.hc .nav-links a, html.hc nav.scrolled .nav-links a { color: #fff; }
     }
     @media (max-width: 600px) {
       .features-grid, .security-grid { grid-template-columns: 1fr; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+      .stat-item { padding: 16px 8px; }
+      .stat-value { font-size: 1.75rem; }
+      .nav-cta { display: none; }
       .hero-actions { flex-direction: column; }
       .hero-actions .btn { width: 100%; justify-content: center; }
       .phone-frame { width: 220px; }
+      .a11y-toggle span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+      .a11y-toggle { padding: 10px 12px; min-width: 48px; justify-content: center; }
       .floating-notif { right: 4px; top: 4px; transform: scale(0.85); transform-origin: top right; animation: none; }
     }
   </style>
 </head>
 <body>
+<a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
 
 <!-- ── Navbar ──────────────────────────────────────────────────────────────── -->
-<nav id="navbar">
+<header>
+<nav id="navbar" aria-label="Principal">
   <div class="container">
     <div class="nav-inner">
-      <a href="#hero" class="nav-logo">
+      <a href="#hero" class="nav-logo" aria-label="Pizzaria Check-In, início da página">
         <div class="logo-icon" aria-hidden="true">🍕</div>
-        Pizzaria Check-In
+        <span aria-hidden="true">Pizzaria Check-In</span>
       </a>
-      <ul class="nav-links">
+      <ul class="nav-links" id="nav-menu">
         <li><a href="#funcionalidades">Funcionalidades</a></li>
         <li><a href="#como-funciona">Como funciona</a></li>
         <li><a href="#para-quem">Para quem</a></li>
@@ -621,22 +754,25 @@
       <div class="nav-cta">
         <a href="#cta" class="btn btn-primary">Solicitar demo</a>
       </div>
-      <button class="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav-menu">
+      <button type="button" class="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav-menu">
         <span></span><span></span><span></span>
       </button>
     </div>
   </div>
 </nav>
+</header>
+
+<main id="conteudo" tabindex="-1">
 
 <!-- ── Hero ────────────────────────────────────────────────────────────────── -->
 <section id="hero">
   <div class="container">
     <div class="hero-grid">
       <div class="hero-content">
-        <div class="hero-eyebrow">Gestão de turno digital</div>
+        <p class="hero-eyebrow">Gestão de turno digital</p>
         <h1>Chega de<br><span>WhatsApp</span> para<br>controlar turnos</h1>
         <p class="hero-sub">
-          Seu time registra as tarefas do turno com foto, você aprova em tempo real e tem histórico completo de tudo. Do celular ao desktop.
+          Seu time registra as tarefas do turno com foto. Você aprova na hora e guarda o histórico completo. Funciona do celular ao computador.
         </p>
         <div class="hero-actions">
           <a href="#cta" class="btn btn-primary">
@@ -662,6 +798,7 @@
       </div>
 
       <div class="hero-visual">
+        <p class="sr-only">Ilustração do sistema. No celular, a tela “Delivery · Abertura” mostra o progresso de 8 de 11 tarefas, com itens marcados como feitos (bater ponto, ligar o computador, verificar maquininhas e impressoras) e itens pendentes (abrir Neemo e Ifood, conferir a escala de motoboys, encher a geladeira). Uma notificação informa: “Checklist aprovado! Delivery, Abertura, agora”. No computador, o painel do gestor mostra 3 checklists pendentes, 18 aprovados, 94% de conclusão e um gráfico de barras.</p>
         <!-- Notificação flutuante -->
         <div class="floating-notif" aria-hidden="true">
           <div class="notif-icon">✅</div>
@@ -748,7 +885,7 @@
         <div class="tag" style="margin-bottom:16px">O problema</div>
         <h2>Planilha não é sistema. WhatsApp não é gestão.</h2>
         <p>
-          A maioria dos restaurantes ainda controla turnos com anotações em papel, grupos de mensagem ou planilhas compartilhadas. O resultado é sempre o mesmo.
+          Muitos restaurantes ainda controlam os turnos com papel, grupos de mensagem ou planilhas. O resultado costuma ser o mesmo.
         </p>
         <ul class="pain-list">
           <li class="pain-item">
@@ -771,7 +908,7 @@
       </div>
 
       <div class="solution-side reveal">
-        <div class="tag" style="background:rgba(229,57,53,.15);color:#FF7070;margin-bottom:20px">A solução</div>
+        <div class="tag tag-dark" style="margin-bottom:20px">A solução</div>
         <h3>Digitalizado, rastreável e em tempo real</h3>
         <p>O funcionário registra tudo no app. Você vê, aprova e tem histórico permanente.</p>
         <div class="solution-steps">
@@ -786,7 +923,7 @@
             <div class="step-number">2</div>
             <div class="step-content">
               <strong>Marca os itens com foto quando necessário</strong>
-              <span>Câmera do celular ou upload — evidência salva na nuvem</span>
+              <span>Câmera do celular ou envio de arquivo. A foto fica guardada na internet (nuvem).</span>
             </div>
           </div>
           <div class="solution-step">
@@ -800,7 +937,7 @@
             <div class="step-number">4</div>
             <div class="step-content">
               <strong>Gestor aprova ou rejeita com comentário</strong>
-              <span>Notificação em tempo real — histórico auditável para sempre</span>
+              <span>Aviso na hora. O histórico fica guardado e pode ser conferido a qualquer momento.</span>
             </div>
           </div>
         </div>
@@ -829,23 +966,23 @@
       </div>
       <div class="feature-card reveal">
         <div class="feature-icon" style="background:#FEF3C7" aria-hidden="true">🔔</div>
-        <h3>Notificações em tempo real</h3>
-        <p>Via WebSocket — gestor recebe alerta de envio, funcionário recebe resultado da revisão. Tudo instantâneo, sem precisar atualizar a página.</p>
+        <h3>Avisos em tempo real</h3>
+        <p>O gestor recebe um alerta quando um checklist é enviado. O funcionário recebe o resultado da revisão. Tudo na hora, sem atualizar a página (usa uma tecnologia chamada WebSocket).</p>
       </div>
       <div class="feature-card reveal">
         <div class="feature-icon" style="background:#EDE9FE" aria-hidden="true">📊</div>
-        <h3>Dashboard com 5 abas</h3>
-        <p>Pendentes com urgência por cor, histórico completo com filtros, ranking da equipe, gestão de modelos e análise de desempenho por item.</p>
+        <h3>Painel (dashboard) com 5 abas</h3>
+        <p>Pendentes com cor de urgência, histórico com filtros, ranking da equipe, gestão de modelos e análise de desempenho por item.</p>
       </div>
       <div class="feature-card reveal">
         <div class="feature-icon" style="background:#DBEAFE" aria-hidden="true">📤</div>
-        <h3>Exportação CSV</h3>
-        <p>Exporte qualquer período filtrado por departamento, status ou funcionário para análise em planilha ou relatório gerencial.</p>
+        <h3>Exportação para planilha (CSV)</h3>
+        <p>Baixe os dados de qualquer período, filtrando por setor, situação ou funcionário. O arquivo CSV abre no Excel e em outras planilhas.</p>
       </div>
       <div class="feature-card reveal">
         <div class="feature-icon" style="background:#FCE7F3" aria-hidden="true">🏆</div>
-        <h3>Streak e ranking de equipe</h3>
-        <p>Engajamento natural — funcionários veem seus dias consecutivos e o gestor acompanha quem está em dia e quem precisa de atenção.</p>
+        <h3>Dias seguidos e ranking da equipe</h3>
+        <p>O funcionário vê quantos dias seguidos cumpriu o checklist (o “streak”). O gestor vê quem está em dia e quem precisa de atenção.</p>
       </div>
     </div>
   </div>
@@ -854,15 +991,15 @@
 <!-- ── Como funciona ────────────────────────────────────────────────────────── -->
 <section id="como-funciona">
   <div class="container">
-    <div class="section-label"><span class="tag" style="background:rgba(229,57,53,.2);color:#FF7070">Fluxo</span></div>
+    <div class="section-label"><span class="tag tag-dark">Fluxo</span></div>
     <h2 class="section-title">Como funciona na prática</h2>
     <p class="section-sub">Dois papéis, uma plataforma. O fluxo inteiro acontece em menos de 5 minutos por turno.</p>
 
     <div class="flow-grid reveal">
       <div class="flow-side">
-        <div class="flow-side-title">
+        <h3 class="flow-side-title">
           <span class="flow-pill pill-emp">Funcionário</span>
-        </div>
+        </h3>
         <div class="flow-steps">
           <div class="flow-step">
             <div class="flow-step-num num-emp">1</div>
@@ -875,21 +1012,21 @@
             <div class="flow-step-num num-emp">2</div>
             <div class="flow-step-body">
               <strong>Marca cada item conforme executa</strong>
-              <span>Concluído ou N/A — pode adicionar nota individual por item</span>
+              <span>Concluído ou “não se aplica” (N/A). Dá para escrever uma nota em cada item.</span>
             </div>
           </div>
           <div class="flow-step">
             <div class="flow-step-num num-emp">3</div>
             <div class="flow-step-body">
               <strong>Tira foto nos itens que exigem evidência</strong>
-              <span>Direto pela câmera do celular — foto salva na nuvem automaticamente</span>
+              <span>Direto pela câmera do celular — foto guardada na nuvem automaticamente</span>
             </div>
           </div>
           <div class="flow-step">
             <div class="flow-step-num num-emp">4</div>
             <div class="flow-step-body">
               <strong>Envia para revisão e recebe confirmação</strong>
-              <span>Notificação de aprovação ou rejeição chega em tempo real</span>
+              <span>O aviso de aprovação ou rejeição chega na hora</span>
             </div>
           </div>
         </div>
@@ -898,22 +1035,22 @@
       <div class="flow-divider" aria-hidden="true"></div>
 
       <div class="flow-side">
-        <div class="flow-side-title">
+        <h3 class="flow-side-title">
           <span class="flow-pill pill-mgr">Gestor</span>
-        </div>
+        </h3>
         <div class="flow-steps">
           <div class="flow-step">
             <div class="flow-step-num num-mgr">1</div>
             <div class="flow-step-body">
               <strong>Recebe notificação de checklist enviado</strong>
-              <span>Badge de pendentes atualiza em tempo real — pode estar em qualquer lugar</span>
+              <span>O contador de pendentes muda na hora. O gestor pode estar em qualquer lugar.</span>
             </div>
           </div>
           <div class="flow-step">
             <div class="flow-step-num num-mgr">2</div>
             <div class="flow-step-body">
               <strong>Abre a página de revisão</strong>
-              <span>Vê todos os itens, fotos em galeria e observação do funcionário</span>
+              <span>Vê todos os itens, as fotos em galeria e a observação do funcionário</span>
             </div>
           </div>
           <div class="flow-step">
@@ -927,7 +1064,7 @@
             <div class="flow-step-num num-mgr">4</div>
             <div class="flow-step-body">
               <strong>Acompanha indicadores no dashboard</strong>
-              <span>Mapa de calor semanal, ranking da equipe, taxa de aprovação e análise por item</span>
+              <span>Mapa de calor da semana, ranking da equipe, taxa de aprovação e análise por item</span>
             </div>
           </div>
         </div>
@@ -946,11 +1083,11 @@
       </div>
       <div class="stat-item">
         <div class="stat-value">12</div>
-        <div class="stat-label">Templates pré-carregados</div>
+        <div class="stat-label">Modelos de checklist prontos</div>
       </div>
       <div class="stat-item">
         <div class="stat-value">100%</div>
-        <div class="stat-label">Rastreável e auditável</div>
+        <div class="stat-label">Rastreável: tudo fica registrado</div>
       </div>
       <div class="stat-item">
         <div class="stat-value">0</div>
@@ -972,7 +1109,7 @@
         <div class="persona-header emp">
           <div class="persona-avatar" aria-hidden="true">👨‍🍳</div>
           <div class="persona-info">
-            <strong>Funcionário</strong>
+            <h3>Funcionário</h3>
             <span>Operação · Linha de frente</span>
           </div>
         </div>
@@ -982,7 +1119,7 @@
             <li>Interface simples — funciona no celular pessoal</li>
             <li>Tira foto de evidência na hora, sem sair do app</li>
             <li>Recebe feedback imediato de aprovação ou rejeição</li>
-            <li>Acompanha seu histórico e streak de dias consecutivos</li>
+            <li>Acompanha seu histórico e os dias seguidos de checklist</li>
             <li>Notificação quando o gestor enviar um lembrete</li>
           </ul>
         </div>
@@ -992,18 +1129,18 @@
         <div class="persona-header mgr">
           <div class="persona-avatar" aria-hidden="true">👔</div>
           <div class="persona-info">
-            <strong>Gestor / Administrador</strong>
+            <h3>Gestor / Administrador</h3>
             <span>Gestão · Supervisão</span>
           </div>
         </div>
         <div class="persona-body">
           <ul class="persona-list">
             <li>Visão completa de todos os setores e funcionários</li>
-            <li>Dashboard com pendentes, histórico e análise</li>
+            <li>Painel (dashboard) com pendentes, histórico e análise</li>
             <li>Revisão com galeria de fotos e comentário de retorno</li>
             <li>Envio de lembrete para quem ainda não preencheu</li>
             <li>Gestão completa de usuários, departamentos e modelos</li>
-            <li>Exportação CSV para relatórios gerenciais</li>
+            <li>Exportação em planilha (CSV) para relatórios</li>
           </ul>
         </div>
       </div>
@@ -1018,25 +1155,25 @@
     <h2 class="section-title">Funciona em qualquer dispositivo</h2>
     <p class="section-sub">Um único sistema, acessível de onde o time estiver — sem instalar nada além de abrir o navegador.</p>
 
-    <div class="platforms-row reveal">
-      <div class="platform-item">
+    <div class="platforms-row reveal" role="list">
+      <div class="platform-item" role="listitem">
         <div class="platform-icon" aria-hidden="true">📱</div>
-        <div class="platform-name">Android</div>
-        <div class="platform-note">Instala como app (PWA)</div>
+        <h3 class="platform-name">Android</h3>
+        <div class="platform-note">Instala como app (PWA: um site que vira app)</div>
       </div>
-      <div class="platform-item">
+      <div class="platform-item" role="listitem">
         <div class="platform-icon" aria-hidden="true">🍎</div>
-        <div class="platform-name">iPhone / iPad</div>
+        <h3 class="platform-name">iPhone / iPad</h3>
         <div class="platform-note">Safari · Adicionar à tela</div>
       </div>
-      <div class="platform-item">
+      <div class="platform-item" role="listitem">
         <div class="platform-icon" aria-hidden="true">🖥️</div>
-        <div class="platform-name">Windows</div>
+        <h3 class="platform-name">Windows</h3>
         <div class="platform-note">App nativo ou navegador</div>
       </div>
-      <div class="platform-item">
+      <div class="platform-item" role="listitem">
         <div class="platform-icon" aria-hidden="true">🌐</div>
-        <div class="platform-name">Qualquer navegador</div>
+        <h3 class="platform-name">Qualquer navegador</h3>
         <div class="platform-note">Chrome, Edge, Safari, Firefox</div>
       </div>
     </div>
@@ -1048,18 +1185,18 @@
   <div class="container">
     <div class="section-label"><span class="tag">Tecnologia</span></div>
     <h2 class="section-title">Construído com tecnologias modernas</h2>
-    <p class="section-sub">Stack Python full-stack com banco PostgreSQL, API assíncrona e interface Flutter compilada para web.</p>
+    <p class="section-sub">Feito em Python, com banco de dados PostgreSQL, uma API rápida (a ponte entre o app e os dados) e interface em Flutter para a web.</p>
 
-    <div class="stack-badges reveal">
-      <div class="stack-badge">🐍 Python 3.12</div>
-      <div class="stack-badge">⚡ FastAPI</div>
-      <div class="stack-badge">🦋 Flet · Flutter Web</div>
-      <div class="stack-badge">🐘 PostgreSQL 16</div>
-      <div class="stack-badge">🔐 JWT + bcrypt</div>
-      <div class="stack-badge">🔌 WebSocket</div>
-      <div class="stack-badge">🐳 Docker Compose</div>
+    <div class="stack-badges reveal" role="list">
+      <div class="stack-badge" role="listitem"><span aria-hidden="true">🐍</span> Python 3.12</div>
+      <div class="stack-badge" role="listitem"><span aria-hidden="true">⚡</span> FastAPI</div>
+      <div class="stack-badge" role="listitem"><span aria-hidden="true">🦋</span> Flet · Flutter Web</div>
+      <div class="stack-badge" role="listitem"><span aria-hidden="true">🐘</span> PostgreSQL 16</div>
+      <div class="stack-badge" role="listitem"><span aria-hidden="true">🔐</span> Login seguro (JWT + bcrypt)</div>
+      <div class="stack-badge" role="listitem"><span aria-hidden="true">🔌</span> Avisos em tempo real (WebSocket)</div>
+      <div class="stack-badge" role="listitem"><span aria-hidden="true">🐳</span> Docker Compose</div>
     </div>
-    <p class="stack-note">Pode ser hospedado em qualquer VPS Linux · Docker · Railway · Fly.io · etc.</p>
+    <p class="stack-note">Pode ser hospedado em qualquer servidor Linux (VPS), com Docker, Railway, Fly.io e outros.</p>
   </div>
 </section>
 
@@ -1068,28 +1205,28 @@
   <div class="container">
     <div class="section-label"><span class="tag">Segurança</span></div>
     <h2 class="section-title">Segurança e conformidade por padrão</h2>
-    <p class="section-sub">Desenvolvido com práticas de segurança desde a base — não como afterthought.</p>
+    <p class="section-sub">Feito com boas práticas de segurança desde o início, e não como algo deixado para depois.</p>
 
     <div class="security-grid">
       <div class="security-card reveal">
         <div class="icon" aria-hidden="true">🔒</div>
-        <h3>Autenticação JWT + bcrypt</h3>
-        <p>Senhas armazenadas com hash bcrypt. Tokens com expiração configurável. Usuários desativados são bloqueados em todas as rotas imediatamente.</p>
+        <h3>Login seguro (JWT + bcrypt)</h3>
+        <p>As senhas são guardadas de forma protegida (hash bcrypt). As chaves de acesso (tokens JWT) têm prazo de validade. Usuários desativados são bloqueados na hora.</p>
       </div>
       <div class="security-card reveal">
         <div class="icon" aria-hidden="true">🛡️</div>
-        <h3>Validação de uploads</h3>
-        <p>Imagens validadas por magic bytes (JPEG, PNG, WebP) — não apenas pela extensão. Limite de 3 MB por arquivo. Nomes gerados por UUID.</p>
+        <h3>Verificação das fotos enviadas</h3>
+        <p>O sistema confere o tipo real da imagem (JPEG, PNG ou WebP), e não só o nome do arquivo. Limite de 3 MB por foto. Os nomes são códigos únicos (UUID).</p>
       </div>
       <div class="security-card reveal">
         <div class="icon" aria-hidden="true">🔏</div>
         <h3>LGPD — Termos e Privacidade</h3>
         <p>
           Páginas de
-          <button class="btn-link" onclick="openModal('modal-termos')">Termos de Uso</button>
+          <button type="button" class="btn-link" onclick="openModal('modal-termos')">Termos de Uso</button>
           e
-          <button class="btn-link" onclick="openModal('modal-privacidade')">Política de Privacidade</button>
-          com base legal definida (Art. 7º, V da LGPD — execução de contrato).
+          <button type="button" class="btn-link" onclick="openModal('modal-privacidade')">Política de Privacidade</button>
+          com base legal definida (Art. 7º, V da LGPD: execução de contrato).
         </p>
       </div>
     </div>
@@ -1099,7 +1236,7 @@
 <!-- ── CTA Final ────────────────────────────────────────────────────────────── -->
 <section id="cta">
   <div class="container" style="position:relative;z-index:1">
-    <div class="tag" style="background:rgba(229,57,53,.2);color:#FF7070;margin-bottom:20px">Comece agora</div>
+    <div class="tag tag-dark" style="margin-bottom:20px">Comece agora</div>
     <h2>Seu time merece uma<br>ferramenta de verdade</h2>
     <p>
       Substitua WhatsApp e planilha por um sistema que funciona. Implantação em um dia, sem treinamento técnico.
@@ -1111,31 +1248,34 @@
       </a>
       <a href="https://github.com/flavios-silva/pizzaria-checkin" class="btn btn-ghost" target="_blank" rel="noopener noreferrer">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
-        Ver no GitHub
+        Ver no GitHub<span class="sr-only"> (abre em uma nova aba)</span>
       </a>
     </div>
   </div>
 </section>
+
+</main>
 
 <!-- ── Footer ───────────────────────────────────────────────────────────────── -->
 <footer>
   <div class="container">
     <div class="footer-inner">
       <a href="#hero" class="footer-logo">
-        <div class="logo-icon" style="width:28px;height:28px;font-size:14px" aria-hidden="true">🍕</div>
+        <div class="logo-icon" style="width:28px;height:28px;font-size:0.875rem" aria-hidden="true">🍕</div>
         Pizzaria Check-In
       </a>
       <div class="footer-links">
         <a href="#funcionalidades">Funcionalidades</a>
         <a href="#como-funciona">Como funciona</a>
         <a href="#seguranca">Segurança</a>
-        <button class="btn-link footer-btn-link" onclick="openModal('modal-termos')">Termos de Uso</button>
-        <button class="btn-link footer-btn-link" onclick="openModal('modal-privacidade')">Privacidade</button>
+        <button type="button" class="btn-link footer-btn-link" onclick="openModal('modal-termos')">Termos de Uso</button>
+        <button type="button" class="btn-link footer-btn-link" onclick="openModal('modal-privacidade')">Privacidade</button>
+        <button type="button" class="btn-link footer-btn-link" onclick="openModal('modal-acessibilidade')">Declaração de acessibilidade</button>
         <a href="mailto:flavios.silva1984@gmail.com">Contato</a>
       </div>
       <div class="footer-copy">
         © 2025 · Todos os direitos reservados<br>
-        <a href="https://flavios-silva.github.io/PJI1/" style="color:rgba(255,255,255,.3);font-size:11px;text-decoration:none;font-family:monospace" target="_blank" rel="noopener">flavios-silva.github.io/PJI1</a>
+        <a href="https://flavios-silva.github.io/PJI1/" class="footer-url" target="_blank" rel="noopener">flavios-silva.github.io/PJI1<span class="sr-only"> (abre em uma nova aba)</span></a>
       </div>
     </div>
   </div>
@@ -1146,7 +1286,7 @@
   <div class="modal-box">
     <div class="modal-header">
       <h2 id="modal-termos-title">Termos de Uso</h2>
-      <button class="modal-close" onclick="closeModal('modal-termos')" aria-label="Fechar termos de uso">×</button>
+      <button type="button" class="modal-close" onclick="closeModal('modal-termos')" aria-label="Fechar termos de uso">×</button>
     </div>
     <div class="modal-body">
       <p>Ao utilizar o Pizzaria Check-In, você concorda com os termos descritos abaixo.</p>
@@ -1169,7 +1309,7 @@
   <div class="modal-box">
     <div class="modal-header">
       <h2 id="modal-priv-title">Política de Privacidade</h2>
-      <button class="modal-close" onclick="closeModal('modal-privacidade')" aria-label="Fechar política de privacidade">×</button>
+      <button type="button" class="modal-close" onclick="closeModal('modal-privacidade')" aria-label="Fechar política de privacidade">×</button>
     </div>
     <div class="modal-body">
       <p>Esta política descreve como o Pizzaria Check-In coleta e utiliza seus dados, em conformidade com a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).</p>
@@ -1178,7 +1318,7 @@
       <h3>Finalidade</h3>
       <p>Os dados são coletados exclusivamente para a execução do contrato de gestão de turnos (Art. 7º, V da LGPD). Não há uso para fins de marketing ou repasse a terceiros.</p>
       <h3>Armazenamento</h3>
-      <p>Os dados são armazenados em servidor seguro com acesso restrito. Fotos são nomeadas por UUID para evitar exposição de informações pessoais nas URLs.</p>
+      <p>Os dados são armazenados em servidor seguro com acesso restrito. As fotos recebem nomes em código (UUID) para não expor informações pessoais nos endereços (URLs).</p>
       <h3>Seus direitos</h3>
       <p>Você pode solicitar acesso, correção ou exclusão dos seus dados a qualquer momento pelo e-mail: <a href="mailto:flavios.silva1984@gmail.com">flavios.silva1984@gmail.com</a></p>
       <h3>Retenção</h3>
@@ -1187,120 +1327,283 @@
   </div>
 </div>
 
-<style>
-  /* btn-link inline para botões estilizados como link */
-  .btn-link {
-    background: none; border: none; cursor: pointer; font-family: inherit;
-    font-size: inherit; color: rgba(255,255,255,.5); text-decoration: none;
-    padding: 0;
-  }
-  .btn-link:hover { color: rgba(255,255,255,.7); }
-  .security-card .btn-link { color: rgba(255,255,255,.6); text-decoration: underline; }
-  .security-card .btn-link:hover { color: #fff; }
-  .footer-btn-link { font-size: 13px; }
-</style>
+
+
+<!-- ── Modal Declaração de Acessibilidade ──────────────────────────────────── -->
+<div id="modal-acessibilidade" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-acc-title">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 id="modal-acc-title">Declaração de acessibilidade</h2>
+      <button type="button" class="modal-close" onclick="closeModal('modal-acessibilidade')" aria-label="Fechar declaração de acessibilidade">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Queremos que todas as pessoas consigam usar esta página. Seguimos as diretrizes WCAG 2.2, nível AA, o modelo brasileiro eMAG e a Lei Brasileira de Inclusão (Lei nº 13.146/2015).</p>
+      <h3>O que oferecemos</h3>
+      <ul>
+        <li><strong>Leitor de tela:</strong> a página usa títulos, listas e regiões bem marcados. As ilustrações têm descrição em texto.</li>
+        <li><strong>Libras:</strong> o botão do VLibras traduz o texto da página para a Língua Brasileira de Sinais.</li>
+        <li><strong>Teclado:</strong> tudo funciona sem mouse. Há um link “Ir para o conteúdo” no começo da página e o foco fica sempre visível.</li>
+        <li><strong>Contraste e tamanho do texto:</strong> o painel “Acessibilidade” aumenta o texto até 150% e liga o modo de alto contraste. Ele também reduz as animações.</li>
+        <li><strong>Linguagem simples:</strong> usamos frases curtas e explicamos os termos técnicos.</li>
+      </ul>
+      <h3>Atalhos de teclado</h3>
+      <ul>
+        <li><kbd>Tab</kbd> e <kbd>Shift</kbd> + <kbd>Tab</kbd>: avançam e voltam entre os itens.</li>
+        <li><kbd>Alt</kbd> + <kbd>A</kbd>: abre e fecha o painel de acessibilidade.</li>
+        <li><kbd>Esc</kbd>: fecha o painel, o menu e as janelas.</li>
+        <li><kbd>Enter</kbd> ou <kbd>Espaço</kbd>: ativam botões e opções.</li>
+      </ul>
+      <h3>Suas escolhas ficam salvas</h3>
+      <p>O tamanho do texto, o alto contraste e a redução de animações ficam guardados neste navegador. Se o seu sistema já pede alto contraste ou menos movimento, a página respeita esse pedido.</p>
+      <h3>Vídeos</h3>
+      <p>Esta página não tem vídeos. Se algum for adicionado, ele terá legendas e janela de Libras.</p>
+      <h3>Limitações conhecidas</h3>
+      <ul>
+        <li>O aplicativo Pizzaria Check-In (depois do login) é feito em Flutter/Flet. Ele ainda está em processo de adaptação para leitores de tela e teclado.</li>
+        <li>O VLibras é um serviço do governo federal e depende de internet. Ele pode errar em alguns termos técnicos.</li>
+      </ul>
+      <h3>Fale com a gente</h3>
+      <p>Encontrou uma barreira ou tem uma sugestão? Escreva para <a href="mailto:flavios.silva1984@gmail.com?subject=Acessibilidade%20-%20Pizzaria%20Check-In">flavios.silva1984@gmail.com</a>. Vamos responder o mais rápido possível.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Painel de acessibilidade ────────────────────────────────────────────── -->
+<div class="a11y-widget" id="a11y-widget">
+  <div class="a11y-panel" id="a11y-panel" role="group" aria-labelledby="a11y-title" hidden>
+    <h2 id="a11y-title">Opções de acessibilidade</h2>
+    <div class="a11y-row">
+      <span class="a11y-label" id="a11y-fs-label">Tamanho do texto</span>
+      <div class="a11y-btns" role="group" aria-labelledby="a11y-fs-label">
+        <button type="button" class="a11y-btn" id="a11y-dec" aria-label="Diminuir o texto">A−</button>
+        <button type="button" class="a11y-btn" id="a11y-normal" aria-label="Tamanho normal do texto">A</button>
+        <button type="button" class="a11y-btn" id="a11y-inc" aria-label="Aumentar o texto">A+</button>
+      </div>
+      <div class="a11y-out" id="a11y-fs-out" role="status" aria-live="polite">Tamanho atual: 100%</div>
+    </div>
+    <button type="button" class="a11y-switch" id="a11y-hc" role="switch" aria-checked="false"><span>Alto contraste</span><span class="state" aria-hidden="true">Desligado</span></button>
+    <button type="button" class="a11y-switch" id="a11y-rm" role="switch" aria-checked="false"><span>Reduzir animações</span><span class="state" aria-hidden="true">Desligado</span></button>
+    <button type="button" class="a11y-reset" id="a11y-reset">Restaurar padrão</button>
+    <button type="button" class="btn-link" id="a11y-decl">Declaração de acessibilidade</button>
+    <p class="a11y-hint">Atalho: <strong>Alt + A</strong> abre e fecha este painel. <strong>Esc</strong> fecha.</p>
+  </div>
+  <button type="button" class="a11y-toggle" id="a11y-toggle" aria-expanded="false" aria-controls="a11y-panel" aria-keyshortcuts="Alt+A">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><circle cx="12" cy="4" r="2"/><path d="M21 9h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/></svg>
+    <span>Acessibilidade</span>
+  </button>
+</div>
+
+<!-- ── VLibras (tradução para Libras) ──────────────────────────────────────── -->
+<div vw class="enabled" id="vlibras-box">
+  <div vw-access-button class="active"></div>
+  <div vw-plugin-wrapper>
+    <div class="vw-plugin-top-wrapper"></div>
+  </div>
+</div>
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js" async
+  onload="try { new window.VLibras.Widget('https://vlibras.gov.br/app'); } catch (e) { var b = document.getElementById('vlibras-box'); if (b) b.hidden = true; }"
+  onerror="var b = document.getElementById('vlibras-box'); if (b) b.hidden = true;"></script>
 
 <script>
-  // ── Navbar scroll ──────────────────────────────────────────────────────────
-  const nav = document.getElementById('navbar');
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 40);
-  }, { passive: true });
+  (function () {
+    'use strict';
+    var root = document.documentElement;
+    var KEY = 'pizzaria-a11y';
+    var STEPS = [100, 110, 125, 150];
 
-  // ── Reveal on scroll ──────────────────────────────────────────────────────
-  const reveals = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver(
-    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
-    { threshold: 0.2, rootMargin: '0px' }
-  );
-  reveals.forEach(el => observer.observe(el));
+    function $(id) { return document.getElementById(id); }
+    function mq(q) { try { return window.matchMedia(q); } catch (e) { return { matches: false, addEventListener: function () {} }; } }
+    var mqContrast = mq('(prefers-contrast: more)');
+    var mqMotion = mq('(prefers-reduced-motion: reduce)');
+    function reduced() { return root.classList.contains('rm'); }
 
-  // ── Menu mobile (via classe CSS, sem inline style) ────────────────────────
-  const hamburger = document.querySelector('.hamburger');
-  hamburger.addEventListener('click', () => {
-    const isOpen = document.body.classList.toggle('menu-open');
-    hamburger.setAttribute('aria-expanded', isOpen);
-    hamburger.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
-  });
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 900) {
-      document.body.classList.remove('menu-open');
-      hamburger.setAttribute('aria-expanded', 'false');
-      hamburger.setAttribute('aria-label', 'Abrir menu');
+    // ── Preferências (localStorage com proteção) ──────────────────────────────
+    var prefs = {};
+    try { prefs = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { prefs = {}; }
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(prefs)); } catch (e) {} }
+    var fs = STEPS.indexOf(prefs.fs) > -1 ? prefs.fs : 100;
+
+    var panel = $('a11y-panel'), toggle = $('a11y-toggle');
+    var out = $('a11y-fs-out'), hcBtn = $('a11y-hc'), rmBtn = $('a11y-rm');
+
+    function setSwitch(btn, on) {
+      btn.setAttribute('aria-checked', on ? 'true' : 'false');
+      btn.querySelector('.state').textContent = on ? 'Ligado' : 'Desligado';
     }
-  }, { passive: true });
+    function applyFs(announce) {
+      root.style.setProperty('--fs', fs / 100);
+      out.textContent = 'Tamanho atual: ' + fs + '%' + (fs === STEPS[STEPS.length - 1] ? ' (máximo)' : fs === STEPS[0] ? ' (padrão)' : '');
+    }
+    function applyHc(on) { root.classList.toggle('hc', on); setSwitch(hcBtn, on); }
+    function applyRm(on) { root.classList.toggle('rm', on); setSwitch(rmBtn, on); }
 
-  // ── Smooth scroll para links internos ────────────────────────────────────
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const href = a.getAttribute('href');
-      if (href === '#') return;
-      const target = document.querySelector(href);
-      if (target) {
-        e.preventDefault();
-        document.body.classList.remove('menu-open');
-        hamburger.setAttribute('aria-expanded', 'false');
-        hamburger.setAttribute('aria-label', 'Abrir menu');
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+    applyFs();
+    applyHc(root.classList.contains('hc'));
+    applyRm(root.classList.contains('rm'));
+
+    $('a11y-inc').addEventListener('click', function () {
+      var i = STEPS.indexOf(fs); fs = STEPS[Math.min(i + 1, STEPS.length - 1)]; prefs.fs = fs; save(); applyFs();
     });
-  });
+    $('a11y-dec').addEventListener('click', function () {
+      var i = STEPS.indexOf(fs); fs = STEPS[Math.max(i - 1, 0)]; prefs.fs = fs; save(); applyFs();
+    });
+    $('a11y-normal').addEventListener('click', function () { fs = 100; prefs.fs = 100; save(); applyFs(); });
+    hcBtn.addEventListener('click', function () { var on = !root.classList.contains('hc'); prefs.hc = on; save(); applyHc(on); });
+    rmBtn.addEventListener('click', function () { var on = !root.classList.contains('rm'); prefs.rm = on; save(); applyRm(on); });
+    $('a11y-reset').addEventListener('click', function () {
+      prefs = {}; try { localStorage.removeItem(KEY); } catch (e) {}
+      fs = 100; applyFs(); applyHc(mqContrast.matches); applyRm(mqMotion.matches);
+    });
+    // segue o sistema enquanto a pessoa não escolheu manualmente
+    if (mqContrast.addEventListener) mqContrast.addEventListener('change', function (e) { if (typeof prefs.hc !== 'boolean') applyHc(e.matches); });
+    if (mqMotion.addEventListener) mqMotion.addEventListener('change', function (e) { if (typeof prefs.rm !== 'boolean') applyRm(e.matches); });
 
-  // ── Contador animado nos stats ────────────────────────────────────────────
-  const statsSection = document.getElementById('stats');
-  let counted = false;
-  new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting && !counted) {
+    // ── Abrir / fechar painel ─────────────────────────────────────────────────
+    function panelOpen() { return !panel.hidden; }
+    function openPanel() {
+      panel.hidden = false; toggle.setAttribute('aria-expanded', 'true');
+      $('a11y-dec').focus();
+    }
+    function closePanel(returnFocus) {
+      panel.hidden = true; toggle.setAttribute('aria-expanded', 'false');
+      if (returnFocus) toggle.focus();
+    }
+    toggle.addEventListener('click', function () { panelOpen() ? closePanel(false) : openPanel(); });
+    document.addEventListener('click', function (e) {
+      if (panelOpen() && !$('a11y-widget').contains(e.target)) closePanel(false);
+    });
+    $('a11y-decl').addEventListener('click', function () { closePanel(false); openModal('modal-acessibilidade', toggle); });
+
+    // ── Menu mobile ───────────────────────────────────────────────────────────
+    var nav = $('navbar');
+    var hamburger = document.querySelector('.hamburger');
+    function setMenu(open) {
+      document.body.classList.toggle('menu-open', open);
+      hamburger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      hamburger.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+    }
+    hamburger.addEventListener('click', function () { setMenu(!document.body.classList.contains('menu-open')); });
+    window.addEventListener('resize', function () { if (window.innerWidth > 900) setMenu(false); }, { passive: true });
+
+    function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 40); }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // ── Aparecer ao rolar (sem animação se a pessoa pediu menos movimento) ────
+    var reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+      }, { threshold: 0.2 });
+      reveals.forEach(function (el) { observer.observe(el); });
+    } else {
+      reveals.forEach(function (el) { el.classList.add('visible'); });
+    }
+
+    // ── Links internos: rolam E movem o foco (teclado / leitor de tela) ───────
+    document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var href = a.getAttribute('href');
+        if (href === '#') return;
+        var target = document.querySelector(href);
+        if (!target) return;
+        e.preventDefault();
+        setMenu(false);
+        target.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
+        if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+        target.focus({ preventScroll: true });
+        try { history.pushState(null, '', href); } catch (err) {}
+      });
+    });
+
+    // ── Contador animado (pulado se houver pedido de menos movimento) ─────────
+    var statsSection = document.getElementById('stats');
+    var counted = false;
+    new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting || counted) return;
       counted = true;
-      document.querySelectorAll('.stat-value').forEach(el => {
-        const raw = el.textContent.trim();
-        const suffix = raw.replace(/[\d]/g, '');
-        const target = parseInt(raw);
-
-        // percentuais usam fade-in para evitar confusão visual
+      if (reduced()) return;
+      document.querySelectorAll('.stat-value').forEach(function (el) {
+        var raw = el.textContent.trim();
+        var suffix = raw.replace(/[\d]/g, '');
+        var target = parseInt(raw, 10);
         if (suffix === '%') {
-          el.style.opacity = '0';
-          el.style.transition = 'opacity 0.8s ease';
-          setTimeout(() => { el.style.opacity = '1'; }, 100);
+          el.style.opacity = '0'; el.style.transition = 'opacity 0.8s ease';
+          setTimeout(function () { el.style.opacity = '1'; }, 100);
           return;
         }
-
-        if (!target && target !== 0) return;
-        if (target === 0) return; // já exibe zero, sem animação
-
-        let current = 0;
-        const step = Math.max(1, Math.ceil(target / 40));
-        const timer = setInterval(() => {
+        if (!target) return;
+        el.setAttribute('aria-label', raw); // leitor de tela lê o valor final, não a contagem
+        var current = 0, step = Math.max(1, Math.ceil(target / 40));
+        var timer = setInterval(function () {
           current = Math.min(current + step, target);
           el.textContent = current + suffix;
-          if (current >= target) clearInterval(timer);
+          if (current >= target) { clearInterval(timer); el.removeAttribute('aria-label'); }
         }, 30);
       });
-    }
-  }, { threshold: 0.5 }).observe(statsSection);
+    }, { threshold: 0.5 }).observe(statsSection);
 
-  // ── Modais Termos / Privacidade ───────────────────────────────────────────
-  function openModal(id) {
-    const modal = document.getElementById(id);
-    if (!modal) return;
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    modal.querySelector('.modal-close').focus();
-  }
-  function closeModal(id) {
-    const modal = document.getElementById(id);
-    if (!modal) return;
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  document.querySelectorAll('.modal-overlay').forEach(modal => {
-    modal.addEventListener('click', e => {
-      if (e.target === modal) closeModal(modal.id);
+    // ── Janelas (modais): foco preso, Esc, retorno do foco, resto inerte ──────
+    var openedModal = null, opener = null;
+    var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
+
+    function setBackgroundInert(on) {
+      Array.prototype.forEach.call(document.body.children, function (el) {
+        if (el.tagName === 'SCRIPT' || el.classList.contains('modal-overlay') || el.classList.contains('skip-link')) return;
+        if (on) { if (!el.inert) { el.inert = true; el.setAttribute('data-a11y-inert', ''); } }
+        else if (el.hasAttribute('data-a11y-inert')) { el.inert = false; el.removeAttribute('data-a11y-inert'); }
+      });
+    }
+    window.openModal = function (id, from) {
+      var modal = document.getElementById(id);
+      if (!modal) return;
+      if (openedModal) window.closeModal(openedModal.id, true);
+      opener = from || document.activeElement;
+      if (panelOpen()) closePanel(false);
+      setMenu(false);
+      modal.classList.add('open');
+      openedModal = modal;
+      setBackgroundInert(true);
+      document.body.style.overflow = 'hidden';
+      modal.querySelector('.modal-close').focus();
+    };
+    window.closeModal = function (id, keepFocus) {
+      var modal = document.getElementById(id);
+      if (!modal) return;
+      modal.classList.remove('open');
+      openedModal = null;
+      setBackgroundInert(false);
+      document.body.style.overflow = '';
+      if (!keepFocus && opener && document.contains(opener) && opener.focus) opener.focus();
+    };
+    document.querySelectorAll('.modal-overlay').forEach(function (modal) {
+      modal.addEventListener('click', function (e) { if (e.target === modal) window.closeModal(modal.id); });
     });
-    modal.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeModal(modal.id);
+
+    document.addEventListener('keydown', function (e) {
+      // Alt + A: painel de acessibilidade
+      if (e.altKey && !e.ctrlKey && !e.metaKey && (e.code === 'KeyA' || (e.key || '').toLowerCase() === 'a')) {
+        if (openedModal) return;
+        e.preventDefault();
+        panelOpen() ? closePanel(true) : openPanel();
+        return;
+      }
+      if (e.key === 'Escape') {
+        if (openedModal) { e.preventDefault(); window.closeModal(openedModal.id); return; }
+        if (panelOpen()) { e.preventDefault(); closePanel(true); return; }
+        if (document.body.classList.contains('menu-open')) { setMenu(false); hamburger.focus(); }
+        return;
+      }
+      if (e.key === 'Tab' && openedModal) {
+        var items = Array.prototype.filter.call(openedModal.querySelectorAll(FOCUSABLE), function (n) { return n.offsetParent !== null; });
+        if (!items.length) return;
+        var first = items[0], last = items[items.length - 1], act = document.activeElement;
+        if (!openedModal.contains(act)) { e.preventDefault(); first.focus(); }
+        else if (e.shiftKey && act === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && act === last) { e.preventDefault(); first.focus(); }
+      }
     });
-  });
+  })();
 </script>
 </body>
 </html>

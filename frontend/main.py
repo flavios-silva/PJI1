@@ -17,6 +17,8 @@ from app.pages.notifications_page import build_notifications_view
 from app.pages.manager.new_user_page import build_new_user_view
 from app.pages.onboarding.setup_page import build_setup_view
 from app.pages.terms_page import build_terms_view
+from app.pages.accessibility_page import build_accessibility_view
+from app import a11y
 from app.ws_client import run_ws_listener
 from app import theme as th
 
@@ -45,7 +47,8 @@ def _build_splash_view() -> ft.View:
                         ),
                         ft.Container(height=32),
                         ft.ProgressRing(
-                            color=ft.Colors.WHITE, width=28, height=28, stroke_width=3
+                            color=ft.Colors.WHITE, width=28, height=28, stroke_width=3,
+                            semantics_label="Carregando",
                         ),
                     ],
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -62,6 +65,18 @@ def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.LIGHT
     page.theme = get_theme()
     page.padding = 0
+    # Idioma da interface: leitores de tela usam a pronúncia do português (WCAG 3.1.1).
+    page.locale_configuration = ft.LocaleConfiguration(
+        supported_locales=[ft.Locale("pt", "BR")],
+        current_locale=ft.Locale("pt", "BR"),
+    )
+
+    # ── Acessibilidade ────────────────────────────────────────────
+    # Escala de texto, alto contraste, atalhos (Alt+A/C/+/-/0) e botão em
+    # todas as telas. Veja app/a11y.py.
+    a11y.install_scaling()
+    a11y.attach_storage(page)
+    a11y.install_keyboard_shortcuts(page, state)
 
     # Desktop window sizing — safe on mobile/web (ignored if not applicable)
     try:
@@ -125,7 +140,22 @@ def main(page: ft.Page):
                 return
         await page.push_route("/manager" if state.is_manager else "/employee")
 
+    def _finish_views():
+        """Põe o botão de acessibilidade em cada tela, aplica a escala e atualiza."""
+        a11y.activate(page)
+        a11y.decorate_views(page, state)
+        for v in page.views:
+            a11y.rescale_tree(v)
+        page.update()
+
+    def _rebuild_current():
+        """Reconstrói a tela atual (usado ao trocar o alto contraste)."""
+        route_change(None)
+
+    a11y.set_rebuild_callback(page, _rebuild_current)
+
     def route_change(e: ft.RouteChangeEvent):
+        a11y.activate(page)  # cores e tamanho de texto DESTA pessoa
         route = page.route
         page.views.clear()
 
@@ -199,11 +229,17 @@ def main(page: ft.Page):
             )
             page.views.append(build_terms_view(page, back, show_tab=tab))
 
+        elif route == "/acessibilidade":
+            back = "/login" if not state.is_authenticated else (
+                "/manager" if state.is_manager else "/employee"
+            )
+            page.views.append(build_accessibility_view(page, back))
+
         else:
             asyncio.create_task(page.push_route("/login"))
             return
 
-        page.update()
+        _finish_views()
 
     def view_pop(e: ft.ViewPopEvent):
         page.views.pop()
@@ -213,10 +249,13 @@ def main(page: ft.Page):
     page.on_route_change = route_change
     page.on_view_pop = view_pop
 
-    if state.is_authenticated:
-        asyncio.create_task(page.push_route("/_splash"))
-    else:
-        asyncio.create_task(page.push_route("/login"))
+    async def _start():
+        # Lê o tamanho de texto e o contraste salvos ANTES de desenhar a 1ª tela.
+        await a11y.load_prefs(page)
+        page.theme = get_theme()
+        await page.push_route("/_splash" if state.is_authenticated else "/login")
+
+    asyncio.create_task(_start())
 
 
 if __name__ == "__main__":

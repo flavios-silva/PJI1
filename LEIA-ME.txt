@@ -1,0 +1,17 @@
+Como aplicar a acessibilidade no PJI1 (no seu computador)
+
+OPÇÃO A - ZIP (mais simples)
+1. Feche o app e faça um backup (ou um commit) da sua pasta PJI1.
+2. Extraia pji1_acessibilidade.zip DENTRO da pasta PJI1, aceitando substituir os arquivos.
+   (as pastas do zip já são as mesmas do projeto: frontend/..., README.md, index.html)
+3. Rode normalmente: start_frontend.bat
+
+OPÇÃO B - PATCH (Git)
+1. Copie acessibilidade.patch para a pasta PJI1.
+2. git apply --check acessibilidade.patch     (testa antes)
+3. git am acessibilidade.patch                 (aplica e cria o commit)
+   Se der conflito, use a Opção A.
+
+Arquivos NOVOS: frontend/app/a11y.py, frontend/app/pages/accessibility_page.py, frontend/assets/index.html
+Atenção: o zip inclui também as correções anteriores para o Flet 0.84 (FilePicker, BoxFit) que já estavam nesta cópia.
+Depois: git add -A && git commit -m "Acessibilidade" && git push

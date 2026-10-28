@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<!--
+  Página de entrada do app web (Flet).
+  O Flet copia este arquivo no lugar do modelo padrão e preenche os pontos
+  marcados (base href e fletAppConfig). Não remova esses dois pontos.
+
+  Acessibilidade aqui:
+  - lang="pt-BR": leitores de tela leem com a voz e a pronúncia do português.
+  - VLibras: tradução para Libras (botão azul no canto da tela).
+  - Ativa a "árvore de acessibilidade" do Flutter logo na abertura, para que
+    leitores de tela e o teclado enxerguem os botões e textos do app.
+-->
+<html lang="pt-BR">
+
+<head>
+  <base href="/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <!-- Sem "user-scalable=no": a pessoa pode dar zoom (WCAG 1.4.4 e 1.4.10) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Checklists diários de turno para a pizzaria.">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Pizzaria Check-In">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon-192.png">
+
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <title>Pizzaria Check-In</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    var flet = {
+      pyodide: false,
+      multiView: false,
+      noCdn: false,
+      webSocketEndpoint: "/ws",
+      entrypointBaseUrl: "/",
+      assetBase: "/",
+      routeUrlStrategy: "path",
+      canvasKitBaseUrl: "/canvaskit/",
+      pyodideUrl: "/pyodide/pyodide.js",
+      webRenderer: "auto",
+      fontFallbackBaseUrl: "assets/fonts/",
+      appPackageUrl: "app.tar.gz"
+    }
+
+    flet.flutterAppLoaded = new Promise((resolve) => {
+      flet.flutterAppResolve = resolve;
+    });
+  </script>
+
+  <!-- fletAppConfig -->
+
+  <script src="python.js"></script>
+
+  <style>
+    /* Foco bem visível para quem navega pelo teclado (WCAG 2.4.7) */
+    flt-semantics:focus, flt-semantics:focus-visible,
+    flt-semantics-placeholder:focus {
+      outline: 3px solid #FFD54F !important;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 5px #000 !important;
+    }
+
+    /* Texto só para leitores de tela */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+
+
+    /* Botão próprio para fechar o painel do VLibras (ele pode ficar preso
+       quando o player não carrega). Alvo de toque de 44px (WCAG 2.5.8). */
+    #vlibras-close {
+      display: none; position: fixed; right: 16px; bottom: 16px;
+      z-index: 2147483647; min-width: 44px; min-height: 44px; padding: 10px 16px;
+      font: 600 16px/1.2 Arial, sans-serif; color: #fff; background: #0D47A1;
+      border: 2px solid #fff; border-radius: 24px; cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,.5);
+    }
+    #vlibras-close:focus-visible { outline: 3px solid #FFD54F; outline-offset: 2px; }
+
+    /* Respeita "reduzir movimento" do sistema (WCAG 2.3.3) */
+    @media (prefers-reduced-motion: reduce) {
+      #loading img { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loading" role="status" aria-live="polite">
+    <style>
+      body { inset: 0; overflow: hidden; margin: 0; padding: 0; position: fixed; }
+      #loading { align-items: center; display: flex; height: 100%; justify-content: center; width: 100%; }
+      #loading img { animation: 1s ease-in-out 0s infinite alternate breathe; opacity: .66; transition: opacity .4s; }
+      #loading.main_done img { opacity: 1; }
+      #loading.init_done img { animation: .33s ease-in-out 0s 1 forwards zooooom; opacity: .05; }
+      @keyframes breathe { from { transform: scale(0.4); opacity: 1.0; } to { transform: scale(0.35); opacity: .7; } }
+      @keyframes zooooom { from { transform: scale(0.4) } to { transform: scale(10) } }
+    </style>
+    <img src="icons/loading-animation.png" alt="Carregando o aplicativo Pizzaria Check-In" />
+  </div>
+
+  <noscript>
+    <p style="font-family: sans-serif; font-size: 1.125rem; padding: 1rem; color: #000; background: #fff; position: fixed; inset: 0; z-index: 99999;">
+      Este aplicativo precisa do JavaScript. Ative o JavaScript no navegador e recarregue a página.
+    </p>
+  </noscript>
+
+  <script src="flutter_bootstrap.js" async></script>
+
+  <!-- ── Ativa a acessibilidade do Flutter Web ─────────────────────────────
+       O Flutter só monta a estrutura lida pelos leitores de tela quando alguém
+       aciona um botão invisível ("Enable accessibility"). Aqui acionamos esse
+       botão automaticamente assim que ele aparece. -->
+  <script>
+    (function () {
+      // Tenta de novo a cada meio segundo até a árvore de acessibilidade existir.
+      // (Um clique muito cedo é ignorado, porque o Flutter ainda está iniciando.)
+      var tries = 0;
+      var timer = setInterval(function () {
+        tries++;
+        if (document.querySelector('flt-semantics') || tries > 240) {
+          clearInterval(timer);
+          return;
+        }
+        var p = document.querySelector('flt-semantics-placeholder');
+        if (p) p.click();
+      }, 500);
+    })();
+  </script>
+
+  <!-- ── VLibras: tradução para Libras ─────────────────────────────────────
+       Serviço do governo federal (https://vlibras.gov.br). Precisa de internet.
+       Se não carregar, o botão é escondido e o app continua funcionando. -->
+  <div vw class="enabled" id="vlibras-box">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js" async
+    onload="try { new window.VLibras.Widget('https://vlibras.gov.br/app'); } catch (e) { var b = document.getElementById('vlibras-box'); if (b) b.hidden = true; }"
+    onerror="var b = document.getElementById('vlibras-box'); if (b) b.hidden = true;"></script>
+
+  <button type="button" id="vlibras-close" aria-label="Fechar o tradutor de Libras (Esc)">✕ Fechar Libras</button>
+  <script>
+    (function () {
+      var btn = document.getElementById('vlibras-close');
+      function wrapper() { return document.querySelector('[vw-plugin-wrapper]'); }
+      function isOpen() {
+        var w = wrapper();
+        if (!w || w.dataset.forceClosed === '1') return false;
+        var r = w.getBoundingClientRect(), cs = getComputedStyle(w);
+        return cs.display !== 'none' && cs.visibility !== 'hidden' && r.width > 50 && r.height > 50;
+      }
+      function closePanel() {
+        var w = wrapper();
+        if (!w) return;
+        w.classList.remove('active');
+        w.dataset.forceClosed = '1';
+        w.style.setProperty('display', 'none', 'important');
+        btn.style.display = 'none';
+      }
+      // Ao tocar de novo no botão azul do VLibras, o painel volta a poder abrir.
+      document.addEventListener('click', function (e) {
+        if (e.target.closest && e.target.closest('[vw-access-button]')) {
+          var w = wrapper();
+          if (w && w.dataset.forceClosed === '1') {
+            delete w.dataset.forceClosed; w.style.removeProperty('display');
+          }
+        }
+      }, true);
+      btn.addEventListener('click', closePanel);
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && isOpen()) closePanel();
+      }, true);
+      setInterval(function () { btn.style.display = isOpen() ? 'block' : 'none'; }, 400);
+    })();
+  </script>
+</body>
+
+</html>

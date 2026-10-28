@@ -95,7 +95,7 @@ def build_setup_view(page: ft.Page, state: AppState) -> ft.View:
         label="Nome do departamento",
         hint_text="Ex: Cozinha, Atendimento...",
         border_radius=10, filled=True, expand=True,
-        text_capitalization=ft.TextCapitalization.SENTENCES,
+        capitalization=ft.TextCapitalization.SENTENCES,
     )
     depts_state: list[dict] = []
 
@@ -176,7 +176,7 @@ def build_setup_view(page: ft.Page, state: AppState) -> ft.View:
 
     # ── step 2: Criar gerente ─────────────────────────────────────────
     mgr_name = ft.TextField(label="Nome completo", border_radius=10, filled=True,
-                            text_capitalization=ft.TextCapitalization.WORDS)
+                            capitalization=ft.TextCapitalization.WORDS)
     mgr_email = ft.TextField(label="E-mail", border_radius=10, filled=True,
                              keyboard_type=ft.KeyboardType.EMAIL)
     mgr_pass = ft.TextField(label="Senha", password=True, can_reveal_password=True,

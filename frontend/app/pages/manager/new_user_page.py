@@ -138,6 +138,7 @@ def build_new_user_view(page: ft.Page, state: AppState) -> ft.View:
             leading=ft.IconButton(
                 ft.Icons.ARROW_BACK,
                 icon_color=ft.Colors.WHITE,
+                tooltip="Voltar para o painel",
                 on_click=lambda e: asyncio.create_task(page.push_route("/manager")),
             ),
             title=ft.Text("Novo Colaborador", color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD),

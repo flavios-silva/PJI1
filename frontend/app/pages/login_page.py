@@ -3,6 +3,7 @@ import asyncio
 from app.state import AppState
 from app.api_client import APIClient, APIError
 from app import theme as th
+from app import a11y
 
 
 def build_login_view(page: ft.Page, state: AppState) -> ft.View:
@@ -18,6 +19,7 @@ def build_login_view(page: ft.Page, state: AppState) -> ft.View:
         value=_last_email,
         prefix_icon=ft.Icons.EMAIL_OUTLINED,
         keyboard_type=ft.KeyboardType.EMAIL,
+        autofill_hints=[ft.AutofillHint.EMAIL],
         border_radius=12,
         filled=True,
         expand=True,
@@ -27,12 +29,16 @@ def build_login_view(page: ft.Page, state: AppState) -> ft.View:
         prefix_icon=ft.Icons.LOCK_OUTLINED,
         password=True,
         can_reveal_password=True,
+        autofill_hints=[ft.AutofillHint.PASSWORD],
         border_radius=12,
         filled=True,
         expand=True,
     )
     error_text = ft.Text("", color=th.ERROR, size=13, visible=False)
-    loading = ft.ProgressRing(visible=False, color=ft.Colors.WHITE, width=20, height=20, stroke_width=2)
+    loading = ft.ProgressRing(
+        visible=False, color=th.PRIMARY, width=24, height=24, stroke_width=3,
+        semantics_label="Entrando, aguarde",
+    )
 
     login_btn = ft.FilledButton(
         "Entrar",
@@ -49,7 +55,7 @@ def build_login_view(page: ft.Page, state: AppState) -> ft.View:
     async def do_login(e):
         error_text.visible = False
         if not email_field.value or not password_field.value:
-            error_text.value = "Preencha todos os campos"
+            error_text.value = "Preencha o e-mail e a senha para entrar."
             error_text.visible = True
             page.update()
             return
@@ -80,10 +86,10 @@ def build_login_view(page: ft.Page, state: AppState) -> ft.View:
             else:
                 asyncio.create_task(page.push_route("/employee"))
         except APIError as ex:
-            error_text.value = ex.detail if isinstance(ex.detail, str) else "Credenciais inválidas"
+            error_text.value = ex.detail if isinstance(ex.detail, str) else "E-mail ou senha incorretos. Confira e tente de novo."
             error_text.visible = True
         except Exception as ex:
-            error_text.value = f"Erro de conexão. Verifique o servidor."
+            error_text.value = "Não foi possível conectar. Verifique a internet e tente de novo."
             error_text.visible = True
         finally:
             login_btn.disabled = False
@@ -124,8 +130,11 @@ def build_login_view(page: ft.Page, state: AppState) -> ft.View:
                                         bgcolor=ft.Colors.with_opacity(0.2, ft.Colors.WHITE),
                                         content=ft.Icon(ft.Icons.LOCAL_PIZZA, color=ft.Colors.WHITE, size=52),
                                     ),
-                                    ft.Text("Pizzaria Check-In", color=ft.Colors.WHITE, size=26, weight=ft.FontWeight.BOLD),
-                                    ft.Text("Gestão de rotina operacional", color=ft.Colors.with_opacity(0.8, ft.Colors.WHITE), size=14),
+                                    ft.Semantics(
+                                        header=True, heading_level=1,
+                                        content=ft.Text("Pizzaria Check-In", color=ft.Colors.WHITE, size=26, weight=ft.FontWeight.BOLD),
+                                    ),
+                                    ft.Text("Gestão de rotina operacional", color=ft.Colors.WHITE, size=14),
                                 ],
                             ),
                         ),
@@ -138,25 +147,28 @@ def build_login_view(page: ft.Page, state: AppState) -> ft.View:
                                 spacing=16,
                                 scroll=ft.ScrollMode.AUTO,
                                 controls=[
-                                    ft.Text("Bem-vindo de volta!", size=22, weight=ft.FontWeight.BOLD, color=th.ON_SURFACE),
+                                    ft.Semantics(
+                                        header=True, heading_level=2,
+                                        content=ft.Text("Bem-vindo de volta!", size=22, weight=ft.FontWeight.BOLD, color=th.ON_SURFACE),
+                                    ),
                                     ft.Text("Faça login para acessar sua conta", size=13, color=th.ON_SURFACE_VARIANT),
                                     ft.Container(height=8),
                                     ft.Row([email_field]),
                                     ft.Row([password_field]),
-                                    error_text,
+                                    a11y.live_message(error_text),
                                     ft.Container(height=4),
                                     ft.Row([login_btn]),
                                     ft.Row([loading], alignment=ft.MainAxisAlignment.CENTER),
                                     ft.Container(height=16),
                                     ft.Row(
                                         [
-                                            ft.Text("Ao entrar, você aceita os ", size=11, color=th.ON_SURFACE_VARIANT),
+                                            ft.Text("Ao entrar, você aceita os ", size=13, color=th.ON_SURFACE_VARIANT),
                                             ft.TextButton(
                                                 "Termos de Uso",
                                                 style=ft.ButtonStyle(padding=ft.Padding.all(0)),
                                                 on_click=lambda _: asyncio.create_task(page.push_route("/terms?tab=terms")),
                                             ),
-                                            ft.Text(" e a ", size=11, color=th.ON_SURFACE_VARIANT),
+                                            ft.Text(" e a ", size=13, color=th.ON_SURFACE_VARIANT),
                                             ft.TextButton(
                                                 "Política de Privacidade",
                                                 style=ft.ButtonStyle(padding=ft.Padding.all(0)),
@@ -167,7 +179,18 @@ def build_login_view(page: ft.Page, state: AppState) -> ft.View:
                                         alignment=ft.MainAxisAlignment.CENTER,
                                         spacing=0,
                                     ),
-                                    ft.Text("v1.0.0 · Pizzaria Check-In", size=11, color=th.ON_SURFACE_VARIANT, text_align=ft.TextAlign.CENTER),
+                                    ft.Row(
+                                        [
+                                            ft.TextButton(
+                                                "Acessibilidade",
+                                                icon=ft.Icons.ACCESSIBILITY_NEW,
+                                                style=ft.ButtonStyle(color=th.PRIMARY),
+                                                on_click=lambda _: asyncio.create_task(page.push_route("/acessibilidade")),
+                                            ),
+                                        ],
+                                        alignment=ft.MainAxisAlignment.CENTER,
+                                    ),
+                                    ft.Text("v1.0.0 · Pizzaria Check-In", size=13, color=th.ON_SURFACE_VARIANT, text_align=ft.TextAlign.CENTER),
                                 ],
                             ),
                         ),

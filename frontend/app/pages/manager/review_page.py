@@ -88,7 +88,7 @@ def build_review_view(page: ft.Page, state: AppState, checklist_id: str) -> ft.V
                                     color=th.STATUS_COLORS["APPROVED"] if photo_missing == 0 else ft.Colors.ORANGE_700),
                             ft.Text(
                                 f"{photos_sent}/{len(photo_required)} fotos" if photo_required else "Sem fotos obrigatórias",
-                                size=11,
+                                size=12,
                                 color=th.STATUS_COLORS["APPROVED"] if photo_missing == 0 else ft.Colors.ORANGE_700,
                             ),
                         ],
@@ -120,7 +120,10 @@ def build_review_view(page: ft.Page, state: AppState, checklist_id: str) -> ft.V
         if emp_avatar_url and state.media_base:
             emp_avatar_widget = ft.Container(
                 width=52, height=52, border_radius=26,
-                content=ft.Image(src=f"{state.media_base}{emp_avatar_url}", fit=ft.ImageFit.COVER),
+                content=ft.Image(
+                    src=f"{state.media_base}{emp_avatar_url}", fit=ft.BoxFit.COVER,
+                    semantics_label="Foto de perfil do funcionário",
+                ),
                 clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
             )
         else:
@@ -175,15 +178,19 @@ def build_review_view(page: ft.Page, state: AppState, checklist_id: str) -> ft.V
                         width=104, height=82,
                         border_radius=8,
                         clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
-                        tooltip="Toque para ampliar",
-                        on_click=lambda e, u=full_url: th.show_photo_dialog(page, u),
+                        tooltip=f"Ampliar a foto: {caption}",
+                        on_click=lambda e, u=full_url, c=caption: th.show_photo_dialog(page, u, f"Foto do item: {c}"),
+                        ink=True,  # permite foco e ativação pelo teclado
                         content=ft.Stack(
                             [
-                                ft.Image(src=full_url, fit=ft.ImageFit.COVER, expand=True),
+                                ft.Image(
+                                    src=full_url, fit=ft.BoxFit.COVER, expand=True,
+                                    semantics_label=f"Foto do item: {caption}",
+                                ),
                                 ft.Container(
                                     content=ft.Text(
                                         caption[:22] + ("…" if len(caption) > 22 else ""),
-                                        size=9, color=ft.Colors.WHITE,
+                                        size=12, color=ft.Colors.WHITE,
                                         weight=ft.FontWeight.W_500, no_wrap=True,
                                     ),
                                     bgcolor=ft.Colors.with_opacity(0.58, ft.Colors.BLACK),
@@ -233,9 +240,9 @@ def build_review_view(page: ft.Page, state: AppState, checklist_id: str) -> ft.V
             ft.Container(
                 content=ft.Row(
                     [
-                        ft.Icon(icon, color=icon_color, size=22),
+                        ft.Icon(icon, color=icon_color, size=22, semantics_label="Feito" if is_done else "Pendente"),
                         ft.Text(title, size=13, expand=True, color=th.ON_SURFACE if is_done else th.ON_SURFACE_VARIANT),
-                        ft.Text(completed_at, size=11, color=th.ON_SURFACE_VARIANT),
+                        ft.Text(completed_at, size=12, color=th.ON_SURFACE_VARIANT),
                     ],
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     spacing=10,
@@ -267,12 +274,16 @@ def build_review_view(page: ft.Page, state: AppState, checklist_id: str) -> ft.V
             full_url = f"{state.media_base}{photo_url}"
             controls.append(
                 ft.Container(
-                    content=ft.Image(src=full_url, width=160, height=120, fit=ft.ImageFit.COVER, border_radius=10),
+                    content=ft.Image(
+                        src=full_url, width=160, height=120, fit=ft.BoxFit.COVER, border_radius=10,
+                        semantics_label=f"Foto enviada para o item: {title}",
+                    ),
                     margin=ft.Margin.only(left=48, bottom=8, right=16),
                     border=ft.border.only(bottom=ft.BorderSide(color=th.SURFACE_VARIANT, width=1)),
-                    on_click=lambda e, u=full_url: th.show_photo_dialog(page, u),
+                    on_click=lambda e, u=full_url, t=title: th.show_photo_dialog(page, u, f"Foto do item: {t}"),
+                    ink=True,  # permite foco e ativação pelo teclado
                     border_radius=10,
-                    tooltip="Toque para ampliar",
+                    tooltip="Ampliar a foto",
                 )
             )
 
@@ -473,7 +484,7 @@ def build_review_view(page: ft.Page, state: AppState, checklist_id: str) -> ft.V
         padding=0,
         appbar=ft.AppBar(
             bgcolor=th.PRIMARY,
-            leading=ft.IconButton(ft.Icons.ARROW_BACK, icon_color=ft.Colors.WHITE, on_click=lambda e: asyncio.create_task(page.push_route("/manager"))),
+            leading=ft.IconButton(ft.Icons.ARROW_BACK, icon_color=ft.Colors.WHITE, tooltip="Voltar para o painel", on_click=lambda e: asyncio.create_task(page.push_route("/manager"))),
             title=ft.Text("Revisar Checklist", color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD),
         ),
         controls=[

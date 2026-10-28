@@ -182,7 +182,7 @@ def build_notifications_view(page: ft.Page, state: AppState) -> ft.View:
                     [
                         title_ctrl,
                         ft.Text(body or "", size=12, color=th.ON_SURFACE_VARIANT, max_lines=2, visible=bool(body)),
-                        ft.Text(time_label, size=11, color=th.ON_SURFACE_VARIANT),
+                        ft.Text(time_label, size=12, color=th.ON_SURFACE_VARIANT),
                     ],
                     spacing=3, expand=True,
                 ),
@@ -227,7 +227,7 @@ def build_notifications_view(page: ft.Page, state: AppState) -> ft.View:
         padding=0,
         appbar=ft.AppBar(
             bgcolor=th.PRIMARY,
-            leading=ft.IconButton(ft.Icons.ARROW_BACK, icon_color=ft.Colors.WHITE, on_click=lambda e: asyncio.create_task(page.push_route(back_route))),
+            leading=ft.IconButton(ft.Icons.ARROW_BACK, icon_color=ft.Colors.WHITE, tooltip="Voltar", on_click=lambda e: asyncio.create_task(page.push_route(back_route))),
             title=ft.Text("Notificações", color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD),
             actions=[mark_all_btn],
         ),

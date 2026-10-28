@@ -105,59 +105,65 @@ Em caso de dúvidas sobre o tratamento de seus dados pessoais, contate o adminis
 """.strip()
 
 
-def build_terms_view(page: ft.Page, back_route: str = "/login", show_tab: str = "terms") -> ft.View:
-    tab_idx = [0 if show_tab == "terms" else 1]
-
-    tabs = ft.Tabs(
-        selected_index=tab_idx[0],
-        animation_duration=150,
-        tabs=[
-            ft.Tab(text="Termos de Uso"),
-            ft.Tab(text="Privacidade"),
+def _legal_text(text: str) -> ft.Control:
+    """Texto longo com rolagem própria; o 1º parágrafo é o título do documento."""
+    title, _, rest = text.partition("\n")
+    return ft.Column(
+        scroll=ft.ScrollMode.AUTO,
+        expand=True,
+        controls=[
+            ft.Container(
+                padding=ft.Padding.symmetric(horizontal=16, vertical=12),
+                content=ft.Column(
+                    spacing=10,
+                    controls=[
+                        ft.Semantics(
+                            header=True, heading_level=1,
+                            content=ft.Text(title, size=18, weight=ft.FontWeight.BOLD, color=th.ON_SURFACE),
+                        ),
+                        ft.Text(rest.strip(), size=14, color=th.ON_SURFACE, selectable=True),
+                    ],
+                ),
+            )
         ],
     )
 
-    terms_body = ft.Container(
-        padding=ft.Padding.symmetric(horizontal=16, vertical=12),
-        content=ft.Text(_TERMS_TEXT, size=13, color=th.ON_SURFACE,
-                        selectable=True),
-    )
-    privacy_body = ft.Container(
-        padding=ft.Padding.symmetric(horizontal=16, vertical=12),
-        content=ft.Text(_PRIVACY_TEXT, size=13, color=th.ON_SURFACE,
-                        selectable=True),
-    )
 
-    scroll = ft.Column(
-        scroll=ft.ScrollMode.AUTO,
-        expand=True,
-        controls=[terms_body],
-    )
-
-    def on_tab_change(e):
-        scroll.controls = [terms_body if tabs.selected_index == 0 else privacy_body]
-        page.update()
-
-    tabs.on_change = on_tab_change
-    scroll.controls = [terms_body if tab_idx[0] == 0 else privacy_body]
-
+def build_terms_view(page: ft.Page, back_route: str = "/login", show_tab: str = "terms") -> ft.View:
     def on_back(_):
         asyncio.create_task(page.push_route(back_route))
 
+    tabs = ft.Tabs(
+        length=2,
+        selected_index=0 if show_tab == "terms" else 1,
+        animation_duration=150,
+        expand=True,
+        content=ft.Column(
+            expand=True,
+            spacing=0,
+            controls=[
+                ft.TabBar(
+                    tabs=[ft.Tab(label="Termos de Uso"), ft.Tab(label="Privacidade")],
+                    label_color=th.PRIMARY,
+                    indicator_color=th.PRIMARY,
+                    unselected_label_color=th.ON_SURFACE_VARIANT,
+                ),
+                ft.TabBarView(
+                    expand=True,
+                    controls=[_legal_text(_TERMS_TEXT), _legal_text(_PRIVACY_TEXT)],
+                ),
+            ],
+        ),
+    )
+
     return ft.View(
         route="/terms",
-        bgcolor=th.BACKGROUND,
+        bgcolor=th.BG,
         padding=0,
         appbar=ft.AppBar(
-            leading=ft.IconButton(ft.Icons.ARROW_BACK, on_click=on_back),
-            title=ft.Text("Termos e Privacidade", size=17, weight=ft.FontWeight.W_600),
-            bgcolor=th.SURFACE,
-            elevation=1,
+            leading=ft.IconButton(ft.Icons.ARROW_BACK, tooltip="Voltar", icon_color=ft.Colors.WHITE, on_click=on_back),
+            title=ft.Text("Termos e Privacidade", size=17, weight=ft.FontWeight.W_600, color=ft.Colors.WHITE),
+            bgcolor=th.PRIMARY,
         ),
-        controls=[
-            ft.Column(
-                [tabs, scroll],
-                expand=True, spacing=0,
-            )
-        ],
+        controls=[tabs],
     )
