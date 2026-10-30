@@ -258,12 +258,17 @@ def main(page: ft.Page):
     asyncio.create_task(_start())
 
 
+
 if __name__ == "__main__":
     import os
+
     web_mode = os.getenv("WEB_MODE", "0") == "1"
+
     ft.run(
         main,
         assets_dir="assets",
         view=ft.AppView.WEB_BROWSER if web_mode else ft.AppView.FLET_APP,
-        port=int(os.getenv("WEB_PORT", "8082")) if web_mode else 0,
+        port=int(os.getenv("PORT", os.getenv("WEB_PORT", "8082"))) if web_mode else 0,
+        host="0.0.0.0" if web_mode else "127.0.0.1",
     )
+
